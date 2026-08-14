@@ -60,49 +60,69 @@ v10 → v10a 분해로 원인이 특정됐다: **HPO는 +2.99, 블렌드 집중�
 ```
 .
 ├── README.md                    이 파일
-├── requirements.txt             평가 서버 환경에 맞춘 핀
 ├── CURRENT_BEST.md              현재 최고 설정 (재빌드 시 기준)
+├── requirements.txt             평가 서버 환경에 맞춘 핀
+├── requirements-colab.txt       코랩용 (numpy/pandas 는 코랩 기본값 사용)
 │
-├── colab/                       ← 팀원 실험용. 코랩에서 바로 실행
-│   └── 01_setup_and_data.ipynb    환경 구성 + 원본 데이터 → 파생 아티팩트
+├── colab/                       ← 팀원은 여기부터
+│   ├── QUICKSTART.md              ★ 처음 한 번 읽는 가이드
+│   ├── GEMINI_PROMPT.md           코랩 Gemini 에 넣는 맥락 프롬프트
+│   ├── 01_setup_and_data.ipynb    환경 구성 + 데이터 받기 (최초 1회)
+│   ├── 02_experiment_template.ipynb  새 실험 만들 때 복사용
+│   ├── 03_run_experiments.ipynb   ★ 평소 쓰는 것. 이름 한 줄 + 프리셋 실행
+│   └── 04_summary.ipynb           팀 결과 집계 → 보고용 마크다운 출력
 │
 ├── src/
 │   ├── config.py                경로 설정. 로컬/코랩 양쪽에서 동작
-│   ├── prepare_data.py          흩어진 파생 캐시 생성을 하나로 묶은 스크립트
-│   ├── lib_lga.py               공통 모듈. 데이터 로딩·피처·라벨역산·bench2
-│   └── experiment.py            실험 러너. 두 폴드 프로토콜 + 시드 노이즈 판정 내장
+│   ├── download.py              데이터 서버에서 받기 (이어받기 + 체크섬 검증)
+│   ├── prepare_data.py          파생 캐시 생성을 하나로 묶은 스크립트
+│   ├── lib_lga.py               공통 모듈. 로딩·피처·라벨역산·bench2
+│   └── experiment.py            실험 러너. 두 폴드 + 시드 노이즈 판정 내장
 │
-├── experiments/                 주요 실험 스크립트 (재현용)
-├── submission/                  제출물 빌드 + 추론 스크립트
+├── experiments/                 실험 스크립트 + 각각이 답한 질문 정리
+├── submission/                  제출물 빌드 · 추론 코드 (Phase 3 제출용)
 │
 ├── docs/
 │   ├── PROTOCOL.md              ★ 검증 규칙. 실험 전에 읽을 것
-│   ├── FINDINGS.md              실측 결과 전체 (채택/기각)
-│   ├── ARCHITECTURE.md          앙상블 구조 — 각 모델의 입력·출력·역할
-│   └── RULES.md                 대회 규칙 준수 사항 (실격 방지)
+│   ├── FINDINGS.md              실측 결과 전체 (채택 7 / 기각 14)
+│   ├── ARCHITECTURE.md          앙상블 25개 모델의 입력·출력·역할
+│   ├── RULES.md                 대회 규칙 준수 (실격 방지)
+│   └── DATA_SERVER_PROMPT.md    데이터 서버 구축·운영 메모
 │
+├── assets/                      pitcher_map.csv, v6_tmsel.json
 └── reports/
-    ├── data_analysis.html       데이터 분석 보고서 (차트 포함)
-    └── model_architecture.html  모델 구조 문서 (다이어그램 포함)
+    ├── data_analysis.html       데이터 분석 보고서 (차트 7개)
+    └── model_architecture.html  모델 구조 문서 (다이어그램)
 ```
 
 ---
 
-## 5분 안에 시작하기 (코랩)
+## 시작하기 (코랩)
 
-1. **[`colab/01_setup_and_data.ipynb`](colab/01_setup_and_data.ipynb)** 를 코랩에서 연다
-2. 런타임 → GPU(T4 이상)로 변경
-3. 첫 셀에서 구글 드라이브를 마운트하고 `open.zip`(대회 배포본)의 경로를 지정
-4. 전부 실행 → `train.csv` 에서 파생 아티팩트가 생성된다
+**[`colab/QUICKSTART.md`](colab/QUICKSTART.md) 를 먼저 읽어라.** 요약하면:
 
-그다음 `src/experiment.py` 로 실험을 시작한다. `lib_lga.bench2()` 를 쓰도록 되어 있어 **폴드2024와 폴드2023 양쪽에서 개선될 때만 채택 판정**이 나온다.
+1. 노트북을 코랩에서 연다 — GitHub 주소를 그대로 붙이면 열린다
+   `https://colab.research.google.com/github/hyunku9566/lga_data/blob/main/colab/01_setup_and_data.ipynb`
+2. 런타임 → 런타임 유형 변경 → **T4 GPU**
+3. 셀을 순서대로 실행. 데이터 서버에서 원본 4개 + 파생 캐시 5개(총 1.1GB)를 받는다
+   (아이디 `team`, 비밀번호는 팀 채널에서 따로 받는다)
+4. 그다음부터는 [`colab/03_run_experiments.ipynb`](colab/03_run_experiments.ipynb) 만 쓴다.
+   맨 위 `RUNNER_NAME` 한 줄만 채우면 된다
 
-```python
-from lib_lga import build_v7, bench2
-X = build_v7()
-r = bench2(X, params, name="my_idea")
-print(r["both"])   # True 여야 채택 후보
-```
+**파생 캐시를 서버에서 받으므로 생성 단계(40~65분)를 건너뛴다.**
+
+실험 결과는 판정과 함께 나온다.
+
+| 판정 | 뜻 |
+|---|---|
+| 채택 후보 | 두 폴드 모두 유의하게 개선. 제출 후보 |
+| 보류 | 폴드끼리 엇갈림. 판단 불가 |
+| 노이즈 | 시드 흔들림(±1.5) 범위 안. 효과 없음 |
+| 기각 | 유의하게 나빠짐 |
+
+> **대회 원본 데이터와 모델 가중치는 이 레포에 없다.** 용량 문제이고 배포 대상도 아니다.
+> 데이터 서버에서 받거나 대회 페이지에서 직접 받아라.
+
 
 > **주의**: 대회 원본 데이터(`train.csv` 등)와 학습된 모델 가중치는 **이 레포에 포함하지 않는다.** 용량 문제이기도 하고 대회 규정상 배포 대상이 아니다. 각자 대회 페이지에서 받아 드라이브에 두고 경로만 지정한다.
 
