@@ -1,0 +1,12 @@
+# 평가 서버 환경: Ubuntu 22.04 / Python 3.11 / CUDA 12.8 / L4
+# 제출 zip 의 requirements.txt 는 submission/ 아래 것을 쓴다. 이 파일은 개발·실험용.
+numpy==1.26.4
+pandas==2.0.3
+scipy==1.15.3
+scikit-learn==1.8.0
+pyarrow>=14.0
+xgboost==3.2.0
+lightgbm==4.7.0
+catboost==1.2.10
+torch
+matplotlib

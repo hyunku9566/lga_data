@@ -1,0 +1,27 @@
+# 대회 원본 데이터 — 배포 금지, 각자 대회 페이지에서 받을 것
+data/
+*.csv
+!docs/*.csv
+
+# 파생 아티팩트 (용량. colab/01_setup_and_data.ipynb 로 재생성)
+*.parquet
+*.npy
+*.npz
+
+# 학습된 모델 가중치 / 제출물
+*.zip
+*.cbm
+*.pt
+model/
+submit_v*/
+
+# 실험 산출물
+results*/
+__pycache__/
+.ipynb_checkpoints/
+
+# assets/ 는 소용량 동봉 자산이다. pitcher_map.csv 는 생성 스크립트가 없어
+# 반드시 레포에 들어가야 한다 (19KB).
+!assets/
+!assets/*.csv
+!assets/*.json

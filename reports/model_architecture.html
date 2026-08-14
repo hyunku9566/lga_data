@@ -1,0 +1,541 @@
+<title>제구 예측 앙상블 해부도</title>
+<style>
+:root{
+  --ground:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5; --rule:#D6DAE2;
+  --ink:#1E242E; --ink-2:#4A5464; --ink-3:#727C8C;
+  --blue:#2B4C7E;          /* 스코어러 청색 — 구조/흐름 */
+  --red:#B4342C;           /* 빨간 연필 — 기각/후퇴 */
+  --green:#2F6B4F;         /* 측정된 이득 */
+  --amber:#8F6316;         /* 불확실 */
+  --blue-wash:#E7ECF4; --red-wash:#F7E9E8; --green-wash:#E6F0EB; --amber-wash:#F6EFE0;
+  --shadow:0 1px 2px rgba(30,36,46,.06),0 4px 16px rgba(30,36,46,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#12151B; --panel:#191D25; --panel-2:#212630; --rule:#2E3540;
+    --ink:#E4E8EF; --ink-2:#AEB7C4; --ink-3:#7E8899;
+    --blue:#8FB2E0; --red:#E8877E; --green:#79C4A0; --amber:#D6AE63;
+    --blue-wash:#1B2534; --red-wash:#2E1E1D; --green-wash:#17281F; --amber-wash:#2A2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 18px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12151B; --panel:#191D25; --panel-2:#212630; --rule:#2E3540;
+  --ink:#E4E8EF; --ink-2:#AEB7C4; --ink-3:#7E8899;
+  --blue:#8FB2E0; --red:#E8877E; --green:#79C4A0; --amber:#D6AE63;
+  --blue-wash:#1B2534; --red-wash:#2E1E1D; --green-wash:#17281F; --amber-wash:#2A2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI","Noto Sans KR",sans-serif;
+  font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px;display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:1060px){
+  .wrap{grid-template-columns:200px minmax(0,1fr);gap:48px;padding-top:8px}
+  nav.toc{position:sticky;top:24px;align-self:start;padding-top:96px}
+}
+nav.toc{display:none}
+@media(min-width:1060px){nav.toc{display:block}}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+nav.toc a{
+  display:block;padding:5px 10px;border-left:2px solid var(--rule);
+  color:var(--ink-3);text-decoration:none;font-size:13px;line-height:1.45;
+}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--blue);border-left-color:var(--blue);background:var(--blue-wash)}
+nav.toc .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-3);margin-right:6px}
+
+header.top{padding:72px 0 40px;border-bottom:2px solid var(--ink);margin-bottom:40px}
+.eyebrow{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 14px
+}
+h1{
+  font-family:Georgia,"Times New Roman",serif;font-weight:600;
+  font-size:clamp(30px,4.6vw,46px);line-height:1.12;letter-spacing:-.015em;
+  margin:0 0 16px;text-wrap:balance;
+}
+.standfirst{font-size:17.5px;color:var(--ink-2);max-width:62ch;margin:0}
+.topstats{display:flex;flex-wrap:wrap;gap:28px;margin-top:28px;padding-top:22px;border-top:1px solid var(--rule)}
+.topstat .k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);display:block}
+.topstat .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;color:var(--ink);display:block;margin-top:3px}
+.topstat .v.hi{color:var(--blue)}
+
+h2{
+  font-family:Georgia,"Times New Roman",serif;font-weight:600;
+  font-size:26px;line-height:1.25;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance;
+}
+h2 .stage{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:400;
+  color:var(--blue);letter-spacing:.08em;display:block;margin-bottom:8px;
+}
+h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:18.5px;margin:34px 0 8px;letter-spacing:-.005em}
+section{padding:44px 0;border-bottom:1px solid var(--rule)}
+section:last-of-type{border-bottom:none}
+p{margin:0 0 15px;max-width:70ch}
+p.lede{color:var(--ink-2);max-width:68ch}
+ul,ol.body{margin:0 0 16px;padding-left:20px;max-width:68ch}
+li{margin-bottom:7px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.875em;background:var(--panel-2);padding:1.5px 5px;border-radius:3px;color:var(--ink)}
+strong{font-weight:650}
+.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+figure{margin:26px 0;padding:0}
+figure svg{display:block;width:100%;max-width:100%;height:auto;color:var(--ink-2)}
+.figbox{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:22px 20px 10px;overflow-x:auto;box-shadow:var(--shadow)}
+figcaption{font-size:13.5px;color:var(--ink-3);margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);max-width:74ch}
+
+.tablewrap{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:6px;background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--panel-2);white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;white-space:nowrap}
+tr.best td{background:var(--blue-wash)}
+tr.bad td{background:var(--red-wash)}
+
+.pill{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+  padding:2px 7px;border-radius:3px;white-space:nowrap;letter-spacing:.02em}
+.pill.up{background:var(--green-wash);color:var(--green)}
+.pill.down{background:var(--red-wash);color:var(--red)}
+.pill.flat{background:var(--panel-2);color:var(--ink-3)}
+
+.callout{border-left:3px solid var(--blue);background:var(--blue-wash);padding:16px 20px;margin:24px 0;border-radius:0 5px 5px 0}
+.callout.warn{border-left-color:var(--red);background:var(--red-wash)}
+.callout p:last-child{margin-bottom:0}
+.callout .lbl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:6px}
+.callout.warn .lbl{color:var(--red)}
+
+pre.math{
+  background:var(--panel);border:1px solid var(--rule);border-radius:6px;
+  padding:18px 20px;overflow-x:auto;margin:20px 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.85;color:var(--ink);
+}
+pre.math .c{color:var(--ink-3)}
+pre.math .h{color:var(--blue)}
+
+.grid2{display:grid;gap:18px;margin:22px 0}
+@media(min-width:760px){.grid2{grid-template-columns:1fr 1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px 20px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 8px;font-family:Georgia,serif;font-size:16px;font-weight:600}
+.card p{font-size:14.5px;color:var(--ink-2);margin-bottom:0;max-width:none}
+
+footer{padding:40px 0 0;color:var(--ink-3);font-size:13.5px}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="목차">
+  <ol>
+    <li><a href="#s1"><span class="num">01</span>파이프라인</a></li>
+    <li><a href="#s2"><span class="num">02</span>피처 생성</a></li>
+    <li><a href="#s3"><span class="num">03</span>앵커 역산</a></li>
+    <li><a href="#s4"><span class="num">04</span>성분 모델</a></li>
+    <li><a href="#s5"><span class="num">05</span>4개 축</a></li>
+    <li><a href="#s6"><span class="num">06</span>블렌드 수식</a></li>
+    <li><a href="#s7"><span class="num">07</span>드리프트 보정</a></li>
+    <li><a href="#s8"><span class="num">08</span>버전 히스토리</a></li>
+    <li><a href="#s9"><span class="num">09</span>미해결 질문</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <p class="eyebrow">LG Aimers 9기 · 투구 제구 예측 · 구조 문서</p>
+  <h1>제구 예측 앙상블 해부도</h1>
+  <p class="standfirst">현재 리더보드 최고 기록 <strong class="num">v10a</strong> 기준. 25개 모델이 4개 축으로 묶여 하나의 확률을 낸다. 각 구성원이 무엇을 먹고, 무엇을 뱉고, 왜 거기 있는지를 코드에서 직접 확인해 정리했다.</p>
+  <div class="topstats">
+    <div class="topstat"><span class="k">LB 최고</span><span class="v hi">1068.5958</span></div>
+    <div class="topstat"><span class="k">모델 수</span><span class="v">25</span></div>
+    <div class="topstat"><span class="k">피처</span><span class="v">120</span></div>
+    <div class="topstat"><span class="k">학습 행</span><span class="v">1,369,784</span></div>
+    <div class="topstat"><span class="k">추론 시간</span><span class="v">101s</span></div>
+  </div>
+</header>
+
+<section id="s1">
+  <h2><span class="stage">STAGE 01</span>전체 파이프라인</h2>
+  <p class="lede">평가 서버는 <code>test.csv</code> 48컬럼을 주고 <code>submission.csv</code>를 받는다. 그 사이에서 일어나는 일 전부다. 흐름은 왼쪽에서 오른쪽으로 한 방향이고, 되돌아오는 화살표는 없다.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 1020 470" role="img" aria-label="test.csv 48컬럼이 featurize를 거쳐 114개 기본 피처가 되고, 성분모델 4개가 6개 피처를 추가해 120개가 된 뒤, XGB·LGB·CatBoost·NN 네 축으로 나뉘어 로짓 공간에서 가중 합산되고, 드리프트 시프트를 거쳐 submission.csv로 나가는 추론 파이프라인">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--blue)"/>
+          </marker>
+        </defs>
+
+        <!-- 입력 -->
+        <rect x="8" y="196" width="96" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="56" y="219" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="600">test.csv</text>
+        <text x="56" y="237" text-anchor="middle" font-size="11" fill="currentColor" opacity=".72">48 컬럼</text>
+
+        <line x1="104" y1="225" x2="150" y2="225" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+
+        <!-- featurize -->
+        <rect x="152" y="186" width="118" height="78" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="211" y="209" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="600">featurize()</text>
+        <text x="211" y="227" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".72">앵커 역산 · 상황</text>
+        <text x="211" y="241" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".72">매치업 · 트랙맨</text>
+        <text x="211" y="257" text-anchor="middle" font-size="11" fill="var(--blue)" font-weight="600">→ 114</text>
+
+        <!-- 분기: 성분모델 -->
+        <path d="M270 210 L300 210 L300 92" fill="none" stroke="var(--blue)" stroke-width="1.4" marker-end="url(#arb)"/>
+        <rect x="302" y="60" width="150" height="64" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="377" y="82" text-anchor="middle" font-size="12" fill="var(--blue)" font-weight="600">성분 모델 ×4</text>
+        <text x="377" y="99" text-anchor="middle" font-size="10.5" fill="var(--blue)" opacity=".85">reverse · middle</text>
+        <text x="377" y="113" text-anchor="middle" font-size="10.5" fill="var(--blue)" opacity=".85">ball · strike</text>
+        <path d="M452 92 L490 92 L490 196" fill="none" stroke="var(--blue)" stroke-width="1.4" marker-end="url(#arb)"/>
+        <text x="500" y="150" font-size="10.5" fill="var(--blue)">로짓 6개</text>
+
+        <line x1="270" y1="240" x2="428" y2="240" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+
+        <!-- 120 피처 -->
+        <rect x="430" y="198" width="104" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+        <text x="482" y="221" text-anchor="middle" font-size="12.5" fill="currentColor" font-weight="600">피처 행렬</text>
+        <text x="482" y="240" text-anchor="middle" font-size="12" fill="var(--blue)" font-weight="600">120</text>
+
+        <!-- 네 축 -->
+        <line x1="534" y1="227" x2="576" y2="72" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="534" y1="227" x2="576" y2="176" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="534" y1="227" x2="576" y2="278" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="534" y1="227" x2="576" y2="382" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+        <rect x="578" y="42" width="176" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="592" y="64" font-size="12" fill="currentColor" font-weight="600">XGBoost ×12</text>
+        <text x="592" y="82" font-size="10.5" fill="currentColor" opacity=".72">d10 · mcw6000 · n2000</text>
+        <text x="742" y="93" text-anchor="end" font-size="11" fill="var(--blue)" font-weight="600">867.7</text>
+
+        <rect x="578" y="146" width="176" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="592" y="168" font-size="12" fill="currentColor" font-weight="600">LightGBM ×7</text>
+        <text x="592" y="186" font-size="10.5" fill="currentColor" opacity=".72">leaves15 · mcs6000</text>
+        <text x="742" y="197" text-anchor="end" font-size="11" fill="var(--blue)" font-weight="600">830.8</text>
+
+        <rect x="578" y="250" width="176" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="592" y="272" font-size="12" fill="currentColor" font-weight="600">CatBoost ×1</text>
+        <text x="592" y="290" font-size="10.5" fill="currentColor" opacity=".72">d6 · 범주 네이티브</text>
+        <text x="742" y="301" text-anchor="end" font-size="11" fill="var(--blue)" font-weight="600">745.1</text>
+
+        <rect x="578" y="354" width="176" height="72" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="592" y="376" font-size="12" fill="currentColor" font-weight="600">신경망 ×16</text>
+        <text x="592" y="394" font-size="10.5" fill="currentColor" opacity=".72">기존 8 + 멀티태스크 8</text>
+        <text x="592" y="410" font-size="10.5" fill="currentColor" opacity=".72">α = 0.4 혼합</text>
+        <text x="742" y="421" text-anchor="end" font-size="11" fill="var(--blue)" font-weight="600">755.0</text>
+
+        <!-- 블렌드 -->
+        <line x1="754" y1="71" x2="806" y2="200" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="754" y1="175" x2="806" y2="212" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="754" y1="279" x2="806" y2="240" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <line x1="754" y1="390" x2="806" y2="252" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+        <text x="770" y="130" font-size="10" fill="currentColor" opacity=".65">.315</text>
+        <text x="770" y="192" font-size="10" fill="currentColor" opacity=".65">.245</text>
+        <text x="770" y="268" font-size="10" fill="currentColor" opacity=".65">.140</text>
+        <text x="770" y="330" font-size="10" fill="currentColor" opacity=".65">.300</text>
+
+        <rect x="808" y="196" width="92" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+        <text x="854" y="219" text-anchor="middle" font-size="12" fill="currentColor" font-weight="600">로짓 합</text>
+        <text x="854" y="237" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".72">가중 평균</text>
+
+        <line x1="900" y1="225" x2="928" y2="225" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+        <rect x="930" y="186" width="82" height="78" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="971" y="208" text-anchor="middle" font-size="11.5" fill="var(--blue)" font-weight="600">드리프트</text>
+        <text x="971" y="225" text-anchor="middle" font-size="11.5" fill="var(--blue)" font-weight="600">−0.020</text>
+        <text x="971" y="245" text-anchor="middle" font-size="10.5" fill="var(--blue)" opacity=".8">σ(logit+d)</text>
+        <text x="971" y="259" text-anchor="middle" font-size="10" fill="currentColor" opacity=".65">→ 제출</text>
+      </svg>
+      <figcaption>추론 파이프라인. 숫자는 폴드2024 단독 BSS다. 성분 모델(청색)만 유일하게 <strong>모델 출력이 다른 모델의 입력으로</strong> 되돌아가며, 나머지 네 축은 서로를 보지 않고 병렬로 예측한 뒤 로짓 공간에서 한 번 합쳐진다.</figcaption>
+    </div>
+  </figure>
+</section>
+
+<section id="s2">
+  <h2><span class="stage">STAGE 02</span>피처 생성 — 48에서 120으로</h2>
+  <p class="lede"><code>featurize()</code>는 원본 48컬럼을 받아 114개를 만든다. 여기에 성분 모델이 6개를 얹어 최종 120개가 트리 축의 입력이 된다.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>피처군</th><th class="n">개수</th><th>생성 방식</th><th>담는 정보</th></tr></thead>
+    <tbody>
+      <tr><td>원본 통과</td><td class="n">37</td><td>그대로 복사 (<code>row_id</code>·타깃·<code>pitchmix_n</code> 제외)</td><td>카운트·주자·점수·이닝·LI·<code>asof_*</code> 19종</td></tr>
+      <tr><td>범주 인코딩</td><td class="n">9</td><td><code>catmap</code> 사전 매핑</td><td>투수 793명 / 타자 831명 / 팀·손·주자상태</td></tr>
+      <tr><td>앵커 역산 <code>*_ssn</code></td><td class="n">17</td><td>7개 지표 × (당해율 · 커리어대비 · 표본수)</td><td>당해 시즌 진행분 — <strong>2025 정보의 유일한 통로</strong></td></tr>
+      <tr><td>다중 축소 <code>*_k*</code></td><td class="n">8</td><td>k∈{25,75,400,1000} 축소강도 4종 × 투수/타자</td><td>표본이 얇을 때와 두꺼울 때를 동시에 표현</td></tr>
+      <tr><td>투수×상황 <code>p_sit_*</code></td><td class="n">26</td><td>12상황 × (성적 · 전체대비 편차) + 매칭</td><td>3볼·2스트·득점권 등에서의 성향</td></tr>
+      <tr><td>매치업 <code>pb_*</code></td><td class="n">3</td><td>투수×타자 쌍 이력, 축소 30</td><td>상대 전적</td></tr>
+      <tr><td>역할·파생</td><td class="n">6</td><td>등판당 투구수 기반 파생 + 손 조합 + 최근경기 대비</td><td>선발/불펜, 등판 내 진행도, 최근 폼 변화</td></tr>
+      <tr><td>트랙맨 프로파일</td><td class="n">8</td><td>2019–24 로그에서 투수별 집계</td><td>VAA/HAA·릴리스 이상치·압박 시 변화</td></tr>
+      <tr class="best"><td><strong>성분 스태킹 <code>cmp_*</code></strong></td><td class="n">6</td><td>성분 모델 4개 출력 + 파생 2개</td><td>이 투구가 역방향/가운데/볼/스트라이크일 확률</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">신경망은 다른 피처 목록을 쓴다</span>
+    <p>기존 NN 8개는 <span class="num">98</span>개(<code>feat_nn.json</code>), 멀티태스크 NN 8개는 수치 <span class="num">105</span>개 + 범주 9개(<code>feat_nn_mt.json</code>)를 받는다. 범주형은 트리에는 정수 코드로, NN에는 임베딩 인덱스로 들어간다. 같은 행을 세 가지 방식으로 표현하는 셈이고, 이 표현 차이가 앙상블 다양성의 일부다.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="stage">STAGE 03</span>앵커 역산 — 2025를 보는 유일한 창</h2>
+  <p class="lede">학습 데이터는 2024년에서 끝나고 평가는 2025년이다. 그런데 <code>test.csv</code>의 <code>asof_*</code> 컬럼에는 그 투수의 2025 시즌 진행분이 이미 녹아 있다. 앵커를 빼면 그게 분리된다.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 760 210" role="img" aria-label="투수의 커리어 누적 투구수 축에서, 학습 데이터 끝(2024년 말)에 저장해둔 앵커 값을 현재 행의 누적값에서 빼면 2025 시즌 진행분만 남는다는 것을 보여주는 그림">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <line x1="40" y1="118" x2="716" y2="118" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar2)"/>
+        <text x="40" y="146" font-size="11" fill="currentColor" opacity=".7">투수 커리어 누적 투구수 →</text>
+
+        <line x1="40" y1="108" x2="40" y2="128" stroke="currentColor" stroke-width="1.5"/>
+        <text x="40" y="98" text-anchor="middle" font-size="11" fill="currentColor">0</text>
+
+        <rect x="40" y="104" width="420" height="28" fill="currentColor" opacity=".10"/>
+        <text x="250" y="80" text-anchor="middle" font-size="11.5" fill="currentColor" opacity=".8">2019 – 2024 (학습 데이터)</text>
+
+        <line x1="460" y1="96" x2="460" y2="140" stroke="var(--blue)" stroke-width="2"/>
+        <text x="460" y="86" text-anchor="middle" font-size="11.5" fill="var(--blue)" font-weight="600">앵커</text>
+        <text x="460" y="160" text-anchor="middle" font-size="10.5" fill="var(--blue)">a_n · succ</text>
+        <text x="460" y="176" text-anchor="middle" font-size="10" fill="currentColor" opacity=".65">모델에 동봉</text>
+
+        <rect x="460" y="104" width="180" height="28" fill="var(--blue)" opacity=".22"/>
+        <text x="550" y="80" text-anchor="middle" font-size="11.5" fill="var(--blue)" font-weight="600">2025 진행분</text>
+
+        <line x1="640" y1="96" x2="640" y2="140" stroke="currentColor" stroke-width="2"/>
+        <text x="640" y="86" text-anchor="middle" font-size="11" fill="currentColor" font-weight="600">현재 행</text>
+        <text x="648" y="160" font-size="10.5" fill="currentColor" opacity=".75">asof_pitcher_n</text>
+
+        <line x1="462" y1="30" x2="638" y2="30" stroke="var(--blue)" stroke-width="1.2"/>
+        <line x1="462" y1="25" x2="462" y2="35" stroke="var(--blue)" stroke-width="1.2"/>
+        <line x1="638" y1="25" x2="638" y2="35" stroke="var(--blue)" stroke-width="1.2"/>
+        <text x="550" y="20" text-anchor="middle" font-size="11" fill="var(--blue)" font-weight="600">dn = n − a_n</text>
+
+        <text x="40" y="198" font-size="11.5" fill="currentColor" opacity=".85">p_succ_ssn = (ds + K·리그평균) / (dn + K),  K = 150</text>
+      </svg>
+      <figcaption>앵커는 각 투수의 <strong>학습 데이터 마지막 시점 누적값</strong>이다. 평가 행의 누적값에서 이걸 빼면 2025 시즌 진행분(<code>dn</code>, <code>ds</code>)만 남는다. 그 행 자신의 컬럼만 쓰므로 행 독립 예측 원칙을 지킨다.</figcaption>
+    </div>
+  </figure>
+
+  <p>같은 방식이 7개 지표에 적용된다 — 투수의 성공률·역방향률·가운데율·볼률·스트라이크율, 타자의 성공률·가운데율. 축소 강도를 4종(<code>k</code> = 25 / 75 / 400 / 1000)으로 나눈 <code>*_k*</code> 피처가 따로 있는 이유는, 시즌 초반(표본 얇음)과 후반(표본 두꺼움)에서 신뢰해야 할 정도가 다르기 때문이다. 모델이 상황에 맞는 축소 강도를 스스로 고르게 둔다.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="stage">STAGE 04</span>성분 모델 — 숨어 있던 라벨 4개</h2>
+  <p class="lede">앙상블에서 유일하게 <strong>다른 모델의 입력을 만드는</strong> 구성원이다. 타깃 <code>control_success</code>가 아니라 그 성분을 예측한다.</p>
+
+  <p><code>asof_pitcher_*_rate</code>에 <code>asof_pitcher_n</code>을 곱해 누적 횟수로 만든 뒤 투수별로 차분하면, 매 투구의 개별 결과 라벨이 정확히 역산된다. 투수 792명 전원이 빈틈없는 연속 수열이라 가능하며, 역산한 success 라벨과 실제 정답의 일치율은 <span class="num">1.000000</span>이다.</p>
+
+  <pre class="math"><span class="c"># 타깃의 논리 구조 (147만 행에서 확인)</span>
+control_success = ¬reverse ∧ ¬middle ∧ Z
+
+<span class="c"># reverse=1 이거나 middle=1 이면 예외 없이 y=0
+# 둘 다 0 일 때만 y 가 살아있고, 거기서 갈린다</span>
+  ball=0, strike=1   n=411,782   y=0.934
+  ball=0, strike=0   n=163,427   y=0.958
+  ball=1, strike=0   n=391,127   y=0.591</pre>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>성분 모델</th><th>입력</th><th>출력</th><th class="n">자체 스킬</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">cmp_ball</td><td class="mono">base 114</td><td class="mono">로짓</td><td class="n">1778.1</td><td>볼성 결과 확률 → <code>cmp_zone</code>의 음항</td></tr>
+      <tr><td class="mono">cmp_reverse</td><td class="mono">base 114</td><td class="mono">로짓</td><td class="n">1430.8</td><td>의도 반대 확률 → <code>cmp_bad</code>의 항</td></tr>
+      <tr><td class="mono">cmp_strike</td><td class="mono">base 114</td><td class="mono">로짓</td><td class="n">1210.5</td><td>스트라이크성 확률 → <code>cmp_zone</code>의 양항</td></tr>
+      <tr><td class="mono">cmp_middle</td><td class="mono">base 114</td><td class="mono">로짓</td><td class="n">887.0</td><td>위험 코스 확률 → <code>cmp_bad</code>의 항</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">왜 이 축이 값어치가 있는가</span>
+    <p>네 성분 전부 <code>control_success</code> 자체(<span class="num">809</span>)보다 훨씬 잘 예측된다. y는 세 사건의 논리곱이라 가장 시끄러운 라벨이고, 성분은 각각 덜 시끄럽다. <strong>덜 시끄러운 보조 예측을 피처로 얹어 y 모델이 더 나은 기저함수를 얻는 구조</strong>다. 폴드2024에서 <span class="pill up">+9.3</span> 측정됐다.</p>
+  </div>
+
+  <div class="callout warn">
+    <span class="lbl">구조적 분해는 3전 3패</span>
+    <p>같은 라벨로 타깃을 분해하려는 시도는 전부 실패했다 — 혼합분해 <span class="pill down">−158</span>, 인수분해 <span class="pill down">−29</span>, 성분×상황 주변확률 피처 <span class="pill down">−11</span>. <strong>성분 라벨은 스태킹/멀티태스크로만 이득이 난다</strong>는 것이 반복 확인된 결론이다.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="stage">STAGE 05</span>네 개의 축</h2>
+  <p class="lede">네 축은 서로를 보지 않는다. 같은 120개 피처(NN은 다른 목록)를 각자의 방식으로 소화하고 독립적으로 확률을 낸다.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>축</th><th>입력</th><th>출력</th><th class="n">단독 BSS</th><th class="n">실효 가중</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr class="best">
+        <td><strong>XGBoost ×12</strong><br><span class="mono">d10·mcw6000<br>n2000·lr.005</span></td>
+        <td class="mono">120 피처</td><td class="mono">확률 →<br>시드 평균 → 로짓</td>
+        <td class="n">867.7</td><td class="n">.315</td>
+        <td>주력. 레벨 단위 성장이라 depth를 키워도 균형을 유지하며, 셋 중 유일하게 용량 확대로 개선됐다</td>
+      </tr>
+      <tr>
+        <td><strong>LightGBM ×7</strong><br><span class="mono">leaves15<br>mcs6000</span></td>
+        <td class="mono">120 피처<br>(<code>.values</code> 순서)</td><td class="mono">확률 →<br>시드 평균 → 로짓</td>
+        <td class="n">830.8</td><td class="n">.245</td>
+        <td>리프 단위 성장이라 트리 모양이 XGB와 다르다. 다양성 공급원</td>
+      </tr>
+      <tr>
+        <td><strong>CatBoost ×1</strong><br><span class="mono">d6·n2000<br>lr.03</span></td>
+        <td class="mono">120 피처<br>범주 9개는 문자열</td><td class="mono">확률 → 로짓</td>
+        <td class="n">745.1</td><td class="n">.140</td>
+        <td>고카디널리티 ID를 ordered target statistics로 처리 — 다른 두 부스터가 못 하는 방식</td>
+      </tr>
+      <tr>
+        <td><strong>신경망 ×16</strong><br><span class="mono">기존 8 + MT 8<br>α = 0.4</span></td>
+        <td class="mono">98 / 105 수치<br>+ 범주 9</td><td class="mono">로짓 →<br>풀별 평균 → 혼합</td>
+        <td class="n">755.0</td><td class="n">.300</td>
+        <td>트리와 가장 상관이 낮은 축. 단독 성능은 최하위지만 가중치는 두 번째로 크다</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>신경망 축의 내부</h3>
+  <p>NN 축은 두 개의 풀을 <code>α</code>로 섞는다. 두 풀은 학습 시점도 목적도 다르다.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>기존 풀 8개 — 단독 <span class="num">729.7</span></h4>
+      <p>TabM 6개 + FT-Transformer 2개. 60여 개 설정을 탐색해 <strong>단독 성능이 아니라 트리와의 블렌딩 이득</strong>으로 골랐다. 전부 <code>emb=0</code>이라 투수/타자 ID를 아예 쓰지 않는다.</p>
+    </div>
+    <div class="card">
+      <h4>멀티태스크 풀 8개 — 단독 <span class="num">711.3</span></h4>
+      <p>MTabM: trunk를 공유하고 헤드 5개(y + 성분 4개)를 동시에 학습한다. L3는 보조 손실을 annealing으로 끄고, L5는 <code>emb=8</code>로 ID 임베딩을 켠다. 추론 시엔 헤드 0만 쓴다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">두 풀을 섞는 게 각각보다 낫다</span>
+    <p>기존 풀 <span class="num">729.7</span>, 멀티태스크 풀 <span class="num">711.3</span>인데 α=0.4로 섞으면 <strong class="num">755.0</strong>이 된다. 어느 쪽 단독보다도 높다. 멀티태스크 NN이 앙상블에 남아 있는 근거는 정확도가 아니라 이 상보성이다.</p>
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="stage">STAGE 06</span>블렌드 수식</h2>
+  <p class="lede">합산은 전부 로짓 공간에서 일어난다. 확률 평균이 아니라 로짓 가중합인 이유는, 극단 확률에서의 정보를 보존하기 위해서다.</p>
+
+  <pre class="math"><span class="c"># 축별 로짓</span>
+lx = logit(XGB 12시드 확률 평균)
+ll = logit(LGB 7시드 확률 평균)
+lc = logit(CatBoost 확률)
+zn = (1−α)·<span class="h">기존NN 8개 로짓 평균</span> + α·<span class="h">멀티태스크NN 8개 로짓 평균</span>
+
+<span class="c"># 트리 축 합산 후 (1−wn) 이 되도록 재정규화</span>
+tree = wx·lx + wl·ll + wc·lc
+tw   = wx + wl + wc
+sc   = (1 − wn) / tw
+
+<span class="c"># 최종</span>
+p = σ( tree·sc + wn·zn )
+p = σ( logit(p) + drift )        <span class="c"># drift = −0.020</span>
+
+<span class="c"># v10a 실제 값</span>
+wx=.45  wl=.35  wc=.20  wn=.30  α=0.4
+<span class="h">실효 가중  XGB .315 / LGB .245 / CB .140 / NN .300</span></pre>
+
+  <p>축이 하나 실패해도 파이프라인이 멈추지 않는다. LightGBM import가 실패하면 <code>wl=0</code>, CatBoost 로드가 실패하면 <code>wc=0</code>으로 두고 <code>tw</code>가 다시 계산된다. 멀티태스크 NN이 실패하면 <code>α=0</code>으로 되돌아가 기존 풀만 쓴다. NN이 전부 실패하면 트리 축만으로 제출한다.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="stage">STAGE 07</span>드리프트 보정과 최근성 가중</h2>
+  <p class="lede">두 장치 모두 같은 문제를 다룬다 — 학습은 2019–2024, 평가는 2025.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>학습 시 · 최근성 가중</h4>
+      <p>시즌 지수감쇠 <code>sample_weight</code>, 반감기 2시즌, 2024 기준. 2024는 1.000, 2023은 0.707, … 2019는 0.177. 대리 실험에서 반감기 2.0이 최적으로 확인됐고, 2024에 가중을 몰아주면 오히려 크게 나빠졌다.</p>
+    </div>
+    <div class="card">
+      <h4>추론 시 · 로짓 시프트</h4>
+      <p>최종 확률에 <code>−0.020</code>을 더한다. 리그 제구율이 <span class="num">.5495 → .4897</span>로 매년 하락하는데 모델은 2024 수준을 예측하기 때문이다. 학습 시즌 추세로만 추정한 상수이며 평가 데이터 분포는 참조하지 않는다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">이 상수는 LB에서 검증됐다</span>
+    <p>보정 없음(1055.1587)과 −0.035(1054.1189) 두 점으로 실제 편향을 <span class="num">+0.0042</span>로 역산하고, 최적값 −0.020의 점수를 <span class="num">1062.06</span>으로 예측했다. 실제 제출 결과는 <strong class="num">1061.9107</strong>이었다. 오차 0.15점.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="stage">STAGE 08</span>버전 히스토리</h2>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>버전</th><th>바뀐 것</th><th class="n">LB</th><th class="n">증분</th><th class="n">폴드2024 CV</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">v6</td><td>기준선 — XGB+LGB+NN 3축</td><td class="n">950</td><td class="n">—</td><td class="n">841.5</td></tr>
+      <tr><td class="mono">v7</td><td>성분 스태킹 + 최근성 가중 + 드리프트</td><td class="n">1061.91</td><td class="n"><span class="pill up">+111.9</span></td><td class="n">—</td></tr>
+      <tr><td class="mono">v8</td><td>멀티태스크 NN 8개 추가</td><td class="n">1062.83</td><td class="n"><span class="pill up">+0.92</span></td><td class="n">—</td></tr>
+      <tr><td class="mono">v9</td><td>CatBoost 축 추가</td><td class="n">1065.61</td><td class="n"><span class="pill up">+2.78</span></td><td class="n">—</td></tr>
+      <tr class="bad"><td class="mono">v10</td><td>전면 재튜닝 <strong>+ 블렌드 집중</strong></td><td class="n">1056.94</td><td class="n"><span class="pill down">−8.67</span></td><td class="n">875.4</td></tr>
+      <tr class="best"><td class="mono"><strong>v10a</strong></td><td>재튜닝만, 블렌드는 v9 유지</td><td class="n"><strong>1068.60</strong></td><td class="n"><span class="pill up">+2.99</span></td><td class="n">861.2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="lbl">CV와 LB가 정확히 반대로 나왔다</span>
+    <p>v10의 블렌드(XGB .70에 집중)는 폴드2024에서 <span class="num">875.4</span>로 v10a의 <span class="num">861.2</span>보다 <strong>14.2점 높았다</strong>. 그런데 LB에서는 <strong>11.66점 낮았다</strong>. 같은 모델, 가중치만 다른데 두 지표의 순서가 뒤집힌다.</p>
+    <p>해석은 이렇다 — 폴드2024는 2023년까지로 학습해 2024를 맞히지만, 실제 평가는 2024년까지로 학습해 2025를 맞힌다. 한 해 더 외삽하는 상황에서는 분산된 앙상블이 방어력을 갖는다. <strong>CV 최적 가중치를 그대로 쓰면 안 된다.</strong></p>
+  </div>
+
+  <h3>레버별 전이율</h3>
+  <p>CV 이득이 LB로 얼마나 넘어왔는지의 기록이다. 선택 절차가 무거울수록 전이율이 떨어진다.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>레버</th><th class="n">CV 이득</th><th class="n">LB 이득</th><th class="n">전이율</th></tr></thead>
+    <tbody>
+      <tr><td>멀티태스크 NN (v8)</td><td class="n">+4.3</td><td class="n">+0.9</td><td class="n">0.2×</td></tr>
+      <tr><td>CatBoost 축 (v9)</td><td class="n">+5.3</td><td class="n">+2.8</td><td class="n">0.5×</td></tr>
+      <tr><td>하이퍼파라미터 재탐색 (v10a)</td><td class="n">+48</td><td class="n">+3.0</td><td class="n">0.06×</td></tr>
+      <tr class="bad"><td>블렌드 가중치 집중 (v10)</td><td class="n">+14.2</td><td class="n">−11.7</td><td class="n">음수</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s9">
+  <h2><span class="stage">STAGE 09</span>정당화가 약한 부분</h2>
+  <p class="lede">팀 논의를 위해, 구조에서 "왜 여기 있는가"에 깨끗한 답이 없는 지점들을 그대로 적는다.</p>
+
+  <h3>LightGBM은 버려질 뻔했다</h3>
+  <p>튜닝 후 폴드2024에서 블렌드 가중치를 격자 탐색했을 때 최적해는 <strong>LGB에 가중치 0</strong>을 줬다(XGB .80 / CB .10 / NN .10, BSS 876.4). 네 축을 다 유지한 구성(874.6)과의 차이는 1.8점뿐이라 안전하게 유지 쪽을 택했지만, 이 축의 기여는 확실하지 않다. 다만 v10 실패가 보여주듯 <strong>CV 최적해를 믿을 근거도 없다</strong>.</p>
+
+  <h3>멀티태스크 NN도 α=0을 받은 적이 있다</h3>
+  <p>같은 격자 탐색에서 α=0(기존 풀만)이 최적으로 나왔다. 그러나 α=0.4 혼합이 두 풀 단독보다 높다는 별도 측정(755.0 vs 729.7 / 711.3)이 있어 유지 중이다. 두 측정이 상충하며, 아직 LB로 분리 검증되지 않았다.</p>
+
+  <h3>CatBoost는 단독 성능이 가장 낮다</h3>
+  <p><span class="num">745.1</span>로 XGB보다 122점 낮다. 깊이를 키우면 d8 <span class="num">639.5</span>, d10 <span class="num">436.7</span>로 붕괴한다. 그럼에도 남아 있는 이유는 v9에서 이 축을 추가했을 때 LB가 <span class="pill up">+2.78</span> 올랐기 때문이다 — 즉 <strong>단독 성능이 아니라 LB 실측이 근거</strong>다.</p>
+
+  <h3>성분 모델만 재튜닝에서 빠져 있다</h3>
+  <p>XGB·LGB·CatBoost는 전부 재탐색했지만 <code>cmp_*</code> 4개는 아직 옛 하이퍼파라미터(d6 · mcw1500 · n600)다. 이 모델들의 출력이 트리 축 전체의 입력으로 들어가는데도 그렇다. 성분 라벨이 y보다 신호가 2배 강하므로 튜닝 여지가 남아 있을 수 있다.</p>
+
+  <h3>구종 라벨은 알지만 쓸 수 없다</h3>
+  <p><code>asof_pitcher_pitchmix_n</code>도 같은 방식으로 차분되어 매 투구의 구종(fastball 54.1% / breaking 29.6% / offspeed 16.3%)이 역산된다. 진짜 구종을 피처로 넣으면 폴드2024가 <span class="num">822.8 → 1005.7</span>로 <strong>+183</strong> 오른다. 그러나 투구 전 정보로 구종을 예측하면 정확도가 54.9%(최빈 52.3%)에 그쳐 합법 경로로는 <span class="pill flat">+1.8</span>뿐이고, 실제 구종은 규칙이 명시적으로 금지한다. <strong>가장 큰 신호 덩어리가 원리적으로 접근 불가</strong>라는 뜻이다.</p>
+</section>
+
+<footer>
+  <p>평가 지표 · Brier Skill Score = 100000 × (1 − BS / r(1−r)) · 표의 BSS는 전부 폴드2024(≤2023 학습 → 2024 검증) 기준 · 코드 출처 <code>submit_v10/script.py</code>, <code>consts.json</code>, <code>build_v10.py</code></p>
+</footer>
+</main>
+</div>
