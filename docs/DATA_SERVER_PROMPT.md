@@ -42,8 +42,12 @@ AI 해커톤 팀원들이 **Google Colab 노트북에서 `wget`/`curl` 로 받�
 - 타임아웃을 넉넉히 (파일당 최소 10분)
 
 **3. 무결성 검증**
-- 각 파일의 **SHA256 체크섬을 담은 `MANIFEST.txt`** 를 같이 서빙해줘
-- 팀원이 받은 뒤 검증할 수 있게, 그 파일에 `파일명  크기  sha256` 형식으로
+- **`MANIFEST.txt` 는 이미 만들어져 있다.** 파일들과 같은 폴더에 들어있고 `파일명 / 크기 / sha256` 형식이다.
+  전송 전 원본에서 뜬 값이니 **새로 만들지 말고 그대로 서빙만** 해줘 (새로 뜨면 전송 중 손상을 못 잡는다)
+- 팀원이 받은 뒤 이렇게 검증할 수 있어야 한다:
+  ```bash
+  sha256sum -c <(awk 'NR>2 {print $3"  "$1}' MANIFEST.txt)
+  ```
 
 **4. HTTPS**
 - `data.hyunku.mmv.kr` 로 접속 가능해야 하고 TLS 필요
@@ -69,19 +73,33 @@ AI 해커톤 팀원들이 **Google Colab 노트북에서 `wget`/`curl` 로 받�
 
 ---
 
-## 우리 쪽에서 준비해둘 것
+## 파일을 홈서버로 옮기는 법
 
-이 서버가 뜨면 `src/config.py` 의 `DATA_URL` 을 채우고,
-`colab/01_setup_and_data.ipynb` 의 다운로드 셀이 Drive 마운트 대신 이 서버를 쓰도록 전환한다.
+작업 PC(WSL2)의 `/home/lee/lga/_serve/` 에 11개 파일 + `MANIFEST.txt` 가 이미 모여 있다.
+하드링크로 모은 것이라 원본과 같은 실체이며 디스크를 추가로 쓰지 않는다.
 
-체크섬 매니페스트 생성은 서버에 파일을 올릴 때 아래로 만들면 된다.
-
+**같은 LAN + SSH (권장)**
 ```bash
-cd /path/to/served/files
-{ printf "%-24s %12s  %s\n" "FILE" "SIZE" "SHA256"
-  for f in *; do
-    [ -f "$f" ] || continue
-    printf "%-24s %12s  %s\n" "$f" "$(stat -c%s "$f")" "$(sha256sum "$f" | cut -d' ' -f1)"
-  done
-} > MANIFEST.txt
+rsync -avP --checksum /home/lee/lga/_serve/ 사용자@서버IP:/srv/lga-data/
 ```
+`-P` 가 진행률 표시 + 이어받기. 끊겨도 재실행하면 이어진다.
+기가비트 유선 20~40초, WiFi 2~5분.
+
+WSL2 는 NAT 뒤에 있지만 **바깥으로 나가는 연결은 정상**이라 홈서버 IP 로 바로 붙는다.
+반대 방향(서버에서 WSL 로 당기기)은 포트 프록시가 필요해 번거롭다. 미는 쪽이 낫다.
+
+**외장 디스크**
+```bash
+cp -av /home/lee/lga/_serve/. /mnt/e/lga-data/    # 윈도우 E: 드라이브 예시
+```
+
+**옮긴 뒤 서버에서 검증**
+```bash
+cd /srv/lga-data && sha256sum -c <(awk 'NR>2 {print $3"  "$1}' MANIFEST.txt)
+```
+전부 `OK` 여야 한다.
+
+## 서버가 뜨면 우리 쪽에서 할 것
+
+`src/config.py` 의 `DATA_URL` 을 채우고,
+`colab/01_setup_and_data.ipynb` 의 다운로드 셀이 Drive 마운트 대신 이 서버를 쓰도록 전환한다.
