@@ -30,6 +30,11 @@ https://colab.research.google.com/github/hyunku9566/lga_data/blob/main/colab/01_
 `01_setup_and_data.ipynb` 의 다운로드 셀을 실행하면 된다.
 아이디는 `team`, 비밀번호는 **팀 채널에서 따로 받는다** (이 저장소에 적어두지 않는다).
 
+> **국내 PC 에서는 안 받아진다.** `lgadata.hyunku.mmv.kr` 이 국내 ISP 에서 차단된다
+> (HTTP 는 warning.or.kr 로 리다이렉트, HTTPS 는 연결 리셋). 서버 문제가 아니라
+> 통신망 경로 문제다. **Colab 에서는 정상 동작이 확인됐다** (HTTP 401 응답).
+> 그러니 데이터는 Colab 에서 받아라. 로컬에 꼭 받아야 하면 VPN 이 필요하다.
+
 받는 파일은 총 약 1.1GB 다.
 
 | 파일 | 크기 | 용도 |
