@@ -61,16 +61,31 @@ def _dest_dir(kind):
             'assets': config.ASSETS_DIR}[kind]
 
 
-def check_reachable(timeout=15):
+# Cloudflare 는 파이썬 기본 User-Agent 를 봇으로 보고 403 을 준다.
+# 브라우저 UA 를 쓰면 통과한다. wget 도 동일하게 맞춘다.
+UA = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+      '(KHTML, like Gecko) Chrome/126.0 Safari/537.36')
+
+
+def check_reachable(timeout=20):
     """서버 도달 가능 여부를 진단한다. 차단 상황을 구분해서 알려준다."""
     try:
-        req = urllib.request.Request(BASE_URL + '/', method='GET')
+        req = urllib.request.Request(BASE_URL + '/', method='GET',
+                                     headers={'User-Agent': UA})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             body = r.read(400).decode('utf-8', 'replace')
     except urllib.error.HTTPError as e:
         if e.code == 401:
             print(f'✅ 서버 정상 (401 = 인증 필요). {BASE_URL}')
             return True
+        if e.code == 403:
+            print('⚠️  HTTP 403 — Cloudflare 가 요청을 차단했다.')
+            print('   보통 봇 탐지다. 아래를 확인해라:')
+            print('   · Cloudflare 대시보드 > Security > Bot Fight Mode 를 끈다')
+            print('   · 또는 WAF 규칙에서 이 호스트를 예외 처리한다')
+            print(f'   터미널에서 이게 401 이면 서버는 정상이다:')
+            print(f'     !curl -sS -o /dev/null -w "%{{http_code}}" {BASE_URL}/MANIFEST.txt')
+            return False
         print(f'⚠️  HTTP {e.code} — 서버는 응답하나 예상과 다르다')
         return False
     except Exception as e:
@@ -83,7 +98,7 @@ def check_reachable(timeout=15):
         print('❌ 국내 ISP 차단 페이지가 반환됐다 (warning.or.kr).')
         print('   서버 문제가 아니라 네트워크 경로 문제다. Colab 에서는 대개 정상이다.')
         return False
-    print(f'⚠️  인증 없이 200 이 반환됐다. Basic Auth 가 걸려 있는지 확인해라.')
+    print('⚠️  인증 없이 200 이 반환됐다. Basic Auth 가 걸려 있는지 확인해라.')
     return True
 
 
@@ -97,6 +112,7 @@ def fetch_one(name, kind, password, force=False, quiet=False):
     url = f'{BASE_URL}/{name}'
     # wget -c 로 이어받기. 끊겨도 재실행하면 이어진다.
     cmd = ['wget', '-c', '-q', '--show-progress', '--progress=bar:force:noscroll',
+           '--user-agent', UA,
            '--user', USER, '--password', password, '-O', dest, url]
     subprocess.run(cmd, check=True)
     return dest
