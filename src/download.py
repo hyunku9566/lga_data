@@ -107,15 +107,24 @@ def probe(name='MANIFEST.txt', password=None, timeout=25):
     password = _get_password(password)
     url = f'{BASE_URL}/{name}'
     tok = base64.b64encode(f'{USER}:{password}'.encode()).decode()
-    req = urllib.request.Request(url, method='HEAD',
+    # HEAD 는 쓰지 않는다. Cloudflare/nginx 가 HEAD 를 다르게 처리해
+    # 같은 자격증명인데도 401 을 주는 경우가 있었다.
+    # 대신 GET 에 Range 를 붙여 1바이트만 받는다.
+    req = urllib.request.Request(url, method='GET',
                                  headers={'User-Agent': UA,
-                                          'Authorization': f'Basic {tok}'})
+                                          'Authorization': f'Basic {tok}',
+                                          'Range': 'bytes=0-0'})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            size = r.headers.get('Content-Length')
-            print(f'✅ {name}  HTTP {r.status}  크기 {int(size)/2**20:.1f}MB' if size
-                  else f'✅ {name}  HTTP {r.status}')
-            return r.status
+            r.read(1)
+            # 206 이면 Content-Range 에 전체 크기가 들어있다
+            cr = r.headers.get('Content-Range')
+            size = cr.split('/')[-1] if cr and '/' in cr else r.headers.get('Content-Length')
+            if size and size.isdigit():
+                print(f'✅ {name}  HTTP {r.status}  크기 {int(size)/2**20:.1f}MB')
+            else:
+                print(f'✅ {name}  HTTP {r.status}')
+            return 200
     except urllib.error.HTTPError as e:
         hint = {401: '비밀번호가 틀렸다',
                 403: 'Cloudflare 가 막았다 (Bot Fight Mode 확인)',
