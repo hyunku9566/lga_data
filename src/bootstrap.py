@@ -66,8 +66,12 @@ def setup(runner=None, drive_root=None, repo='/content/lga-repo',
         for d in (f'{drive_root}/data', f'{drive_root}/cache',
                   f'{drive_root}/ledger', f'{local_root}/data', f'{local_root}/cache'):
             os.makedirs(d, exist_ok=True)
-    if repo not in sys.path:
-        sys.path.insert(0, repo)
+    # 두 규약을 모두 지원한다.
+    #   from src.lib_lga import ...   (레포 루트가 경로에 있을 때)
+    #   import lib_lga                (src/ 가 경로에 있을 때)
+    for p in (os.path.join(repo, 'src'), repo):
+        if p not in sys.path:
+            sys.path.insert(0, p)
 
     from . import config as C
 
