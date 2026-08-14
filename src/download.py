@@ -139,13 +139,36 @@ def _netrc(password):
     return path
 
 
+def _expected_size(name):
+    """MANIFEST.txt 가 이미 있으면 기대 크기를 돌려준다."""
+    from . import config
+    for man in (os.path.join(config.DATA_DIR, 'MANIFEST.txt'),
+                os.path.join(config.ROOT, 'MANIFEST.txt')):
+        if not os.path.exists(man):
+            continue
+        with open(man) as f:
+            for line in f:
+                p = line.split()
+                if len(p) == 3 and p[0] == name and p[1].isdigit():
+                    return int(p[1])
+    return None
+
+
 def fetch_one(name, kind, password, force=False, quiet=False, netrc=None):
     dest = os.path.join(_dest_dir(kind), name)
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     if os.path.exists(dest) and not force:
-        if not quiet:
-            print(f'  건너뜀 (이미 있음)  {name}')
-        return dest
+        have = os.path.getsize(dest)
+        want = _expected_size(name)
+        if have == 0:
+            print(f'  빈 파일이라 다시 받는다  {name}')
+            os.remove(dest)
+        elif want is not None and have != want:
+            print(f'  크기 불일치({have:,} != {want:,}) 이어받는다  {name}')
+        else:
+            if not quiet:
+                print(f'  건너뜀 (이미 있음)  {name}')
+            return dest
     url = f'{BASE_URL}/{name}'
     own = netrc is None
     if own:
