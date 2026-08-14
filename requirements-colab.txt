@@ -1,0 +1,11 @@
+# Colab 전용. numpy/pandas/scipy/sklearn/torch 는 코랩에 이미 깔린 것을 쓴다.
+#
+# requirements.txt 의 핀(numpy==1.26.4, pandas==2.0.3)은 대회 평가 서버
+# (Python 3.11) 기준이다. 코랩은 Python 3.12 라 그 버전들의 휠이 없어
+# 소스 빌드를 시도하다 실패한다. 여기서는 핀하지 않는다.
+#
+# 제출용 requirements 는 submission/ 아래 것을 쓴다. 이 파일과 무관하다.
+xgboost>=2.1
+lightgbm>=4.5
+catboost>=1.2
+pyarrow>=14.0
