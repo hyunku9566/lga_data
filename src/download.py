@@ -24,7 +24,7 @@ import urllib.request
 import urllib.error
 import base64
 
-BASE_URL = os.environ.get('LGA_DATA_URL', 'https://data.hyunku.mmv.kr')
+BASE_URL = os.environ.get('LGA_DATA_URL', 'https://lgadata.hyunku.mmv.kr')
 USER = os.environ.get('LGA_DATA_USER', 'team')
 
 # (파일명, 저장 위치 종류) — 'data' 는 DATA_DIR, 'cache' 는 CACHE_DIR, 'assets' 는 ASSETS_DIR

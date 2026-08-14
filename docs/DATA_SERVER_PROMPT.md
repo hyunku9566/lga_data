@@ -6,7 +6,7 @@
 
 ## 붙여넣을 프롬프트
 
-집 서버에 도커로 **정적 파일 다운로드 서버**를 올리려고 해. 도메인은 `data.hyunku.mmv.kr` 이고,
+집 서버에 도커로 **정적 파일 다운로드 서버**를 올리려고 해. 도메인은 `lgadata.hyunku.mmv.kr` 이고,
 AI 해커톤 팀원들이 **Google Colab 노트북에서 `wget`/`curl` 로 받아가는** 용도야.
 
 ### 서빙할 파일 (총 약 1.1GB)
@@ -50,7 +50,7 @@ AI 해커톤 팀원들이 **Google Colab 노트북에서 `wget`/`curl` 로 받�
   ```
 
 **4. HTTPS**
-- `data.hyunku.mmv.kr` 로 접속 가능해야 하고 TLS 필요
+- `lgadata.hyunku.mmv.kr` 로 접속 가능해야 하고 TLS 필요
 - 홈서버라 공인 IP/포트포워딩 상황을 먼저 물어봐줘. 상황에 따라 **Cloudflare Tunnel** 이 포트 개방 없이 깔끔할 수 있어 (그쪽이면 TLS도 자동)
 - Let's Encrypt 직접 발급 방식과 Cloudflare Tunnel 방식의 장단점을 비교해서 추천해줘
 
