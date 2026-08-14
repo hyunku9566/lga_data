@@ -183,19 +183,30 @@ def fetch_one(name, kind, password, force=False, quiet=False, netrc=None):
     if own:
         netrc = _netrc(password)
     try:
-        # -c 이어받기. 끊겨도 재실행하면 이어진다.
-        # 자격증명은 netrc 로 넘긴다 (argv 에 남기지 않는다).
-        cmd = ['wget', '-c', '--show-progress', '--progress=bar:force:noscroll',
-               '--user-agent', UA, f'--netrc-file={netrc}', '-O', dest, url]
+        # curl 을 쓴다. GNU wget 에는 --netrc-file 옵션이 없다(그건 curl 것이다).
+        #   -C -            이어받기. 끊겨도 재실행하면 이어진다
+        #   --netrc-file    자격증명을 argv 에 남기지 않는다
+        #   -f              HTTP 에러면 실패로 처리
+        cmd = ['curl', '-fL', '-C', '-', '--retry', '3', '--retry-delay', '2',
+               '--netrc-file', netrc, '-A', UA,
+               '--progress-bar', '-o', dest, url]
         r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode == 33:
+            # 서버가 Range 를 거부하면 처음부터 다시 받는다
+            if os.path.exists(dest):
+                os.remove(dest)
+            cmd.remove('-C'); cmd.remove('-')
+            r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             tail = (r.stderr or '').strip().splitlines()[-4:]
-            print(f'  ❌ {name} 실패 (wget {r.returncode})')
+            print(f'  ❌ {name} 실패 (curl {r.returncode})')
             for l in tail:
                 print(f'     {l}')
             if os.path.exists(dest) and os.path.getsize(dest) == 0:
                 os.remove(dest)
             raise RuntimeError(f'{name} 다운로드 실패')
+        sz = os.path.getsize(dest) if os.path.exists(dest) else 0
+        print(f'     받음 {sz/2**20:.1f}MB')
     finally:
         if own and os.path.exists(netrc):
             os.remove(netrc)
