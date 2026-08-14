@@ -56,7 +56,10 @@ def _get_password(password=None):
 
 
 def _dest_dir(kind):
-    from . import config
+    try:
+        from . import config
+    except ImportError:
+        import config
     return {'data': config.DATA_DIR, 'cache': config.CACHE_DIR,
             'assets': config.ASSETS_DIR}[kind]
 
@@ -150,7 +153,10 @@ def _netrc(password):
 
 def _expected_size(name):
     """MANIFEST.txt 가 이미 있으면 기대 크기를 돌려준다."""
-    from . import config
+    try:
+        from . import config
+    except ImportError:
+        import config
     for man in (os.path.join(config.DATA_DIR, 'MANIFEST.txt'),
                 os.path.join(config.ROOT, 'MANIFEST.txt')):
         if not os.path.exists(man):
@@ -244,7 +250,10 @@ def fetch_all(password=None, force=False, only=None, stop_on_error=False):
     if failed:
         print(f'\n실패 {len(failed)}건: {", ".join(failed)}')
         print('원인을 보려면:  from src.download import probe; probe("train.csv")')
-    from . import config
+    try:
+        from . import config
+    except ImportError:
+        import config
     man = os.path.join(config.DATA_DIR, 'MANIFEST.txt')
     if os.path.exists(man):
         print('\n체크섬 검증')

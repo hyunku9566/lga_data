@@ -73,7 +73,10 @@ def setup(runner=None, drive_root=None, repo='/content/lga-repo',
         if p not in sys.path:
             sys.path.insert(0, p)
 
-    from . import config as C
+    try:
+        from . import config as C
+    except ImportError:
+        import config as C
 
     want = list(_NEED) + (list(_OPTIONAL) if need_optional else [])
     dst_of = {'data': C.DATA_DIR, 'cache': C.CACHE_DIR}
@@ -98,7 +101,10 @@ def setup(runner=None, drive_root=None, repo='/content/lga-repo',
     if missing:
         if verbose:
             print(f'\nDrive 에 없어 서버에서 받는다: {", ".join(n for n, _ in missing)}')
-        from .download import fetch_all
+        try:
+            from .download import fetch_all
+        except ImportError:
+            from download import fetch_all
         fetch_all(only=[n for n, _ in missing])
         # 다음 런타임을 위해 Drive 에 백업
         if drive_root:
