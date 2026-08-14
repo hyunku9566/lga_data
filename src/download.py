@@ -42,7 +42,7 @@ FILES = [
     ('v6_tmsel.json',         'assets'),
 ]
 
-__all__ = ['check_reachable', 'fetch_all', 'fetch_one', 'verify', 'BASE_URL']
+__all__ = ['check_reachable', 'probe', 'fetch_all', 'fetch_one', 'verify', 'BASE_URL']
 
 
 def _get_password(password=None):
@@ -102,7 +102,44 @@ def check_reachable(timeout=20):
     return True
 
 
-def fetch_one(name, kind, password, force=False, quiet=False):
+def probe(name='MANIFEST.txt', password=None, timeout=25):
+    """단일 파일의 HTTP 상태만 확인한다. 실패 원인 파악용."""
+    password = _get_password(password)
+    url = f'{BASE_URL}/{name}'
+    tok = base64.b64encode(f'{USER}:{password}'.encode()).decode()
+    req = urllib.request.Request(url, method='HEAD',
+                                 headers={'User-Agent': UA,
+                                          'Authorization': f'Basic {tok}'})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            size = r.headers.get('Content-Length')
+            print(f'✅ {name}  HTTP {r.status}  크기 {int(size)/2**20:.1f}MB' if size
+                  else f'✅ {name}  HTTP {r.status}')
+            return r.status
+    except urllib.error.HTTPError as e:
+        hint = {401: '비밀번호가 틀렸다',
+                403: 'Cloudflare 가 막았다 (Bot Fight Mode 확인)',
+                404: '서버에 그 파일이 없다 — 아직 업로드 안 된 것 같다'}.get(e.code, '')
+        print(f'❌ {name}  HTTP {e.code}  {hint}')
+        return e.code
+    except Exception as e:
+        print(f'❌ {name}  {type(e).__name__}: {e}')
+        return None
+
+
+def _netrc(password):
+    """비밀번호를 명령줄에 노출하지 않기 위해 임시 netrc 를 쓴다.
+       (argv 는 traceback 과 ps 에 그대로 찍힌다)"""
+    import tempfile
+    host = BASE_URL.split('://', 1)[-1].split('/')[0]
+    fd, path = tempfile.mkstemp(prefix='.netrc_')
+    with os.fdopen(fd, 'w') as f:
+        f.write(f'machine {host} login {USER} password {password}\n')
+    os.chmod(path, 0o600)
+    return path
+
+
+def fetch_one(name, kind, password, force=False, quiet=False, netrc=None):
     dest = os.path.join(_dest_dir(kind), name)
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     if os.path.exists(dest) and not force:
@@ -110,33 +147,66 @@ def fetch_one(name, kind, password, force=False, quiet=False):
             print(f'  건너뜀 (이미 있음)  {name}')
         return dest
     url = f'{BASE_URL}/{name}'
-    # wget -c 로 이어받기. 끊겨도 재실행하면 이어진다.
-    cmd = ['wget', '-c', '-q', '--show-progress', '--progress=bar:force:noscroll',
-           '--user-agent', UA,
-           '--user', USER, '--password', password, '-O', dest, url]
-    subprocess.run(cmd, check=True)
+    own = netrc is None
+    if own:
+        netrc = _netrc(password)
+    try:
+        # -c 이어받기. 끊겨도 재실행하면 이어진다.
+        # 자격증명은 netrc 로 넘긴다 (argv 에 남기지 않는다).
+        cmd = ['wget', '-c', '--show-progress', '--progress=bar:force:noscroll',
+               '--user-agent', UA, f'--netrc-file={netrc}', '-O', dest, url]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            tail = (r.stderr or '').strip().splitlines()[-4:]
+            print(f'  ❌ {name} 실패 (wget {r.returncode})')
+            for l in tail:
+                print(f'     {l}')
+            if os.path.exists(dest) and os.path.getsize(dest) == 0:
+                os.remove(dest)
+            raise RuntimeError(f'{name} 다운로드 실패')
+    finally:
+        if own and os.path.exists(netrc):
+            os.remove(netrc)
     return dest
 
 
-def fetch_all(password=None, force=False, only=None):
-    """전체 다운로드. only=['train.csv', ...] 로 일부만 받을 수 있다."""
+def fetch_all(password=None, force=False, only=None, stop_on_error=False):
+    """전체 다운로드. only=['train.csv', ...] 로 일부만 받을 수 있다.
+
+    한 파일이 실패해도 나머지를 계속 받는다 (stop_on_error=True 면 중단).
+    마지막에 실패 목록과 체크섬 검증 결과를 보여준다."""
     password = _get_password(password)
     targets = [(n, k) for n, k in FILES if only is None or n in only]
-    print(f'{len(targets)}개 파일 다운로드 — {BASE_URL}')
-    for name, kind in targets:
-        print(f'▶ {name}')
-        fetch_one(name, kind, password, force=force)
-    # MANIFEST 는 항상 최신으로 받는다
-    from . import config
-    man = os.path.join(config.ROOT, 'MANIFEST.txt')
+    print(f'{len(targets)}개 파일 다운로드 — {BASE_URL}\n')
+    nrc = _netrc(password)
+    failed = []
     try:
-        fetch_one('MANIFEST.txt', 'data', password, force=True, quiet=True)
-        man = os.path.join(config.DATA_DIR, 'MANIFEST.txt')
-    except Exception as e:
-        print(f'  MANIFEST 를 받지 못했다: {e}')
-        return
-    print('\n체크섬 검증')
-    verify(man)
+        for name, kind in targets:
+            print(f'▶ {name}')
+            try:
+                fetch_one(name, kind, password, force=force, netrc=nrc)
+            except Exception as e:
+                failed.append(name)
+                if stop_on_error:
+                    raise
+        try:
+            fetch_one('MANIFEST.txt', 'data', password, force=True,
+                      quiet=True, netrc=nrc)
+        except Exception:
+            failed.append('MANIFEST.txt')
+    finally:
+        if os.path.exists(nrc):
+            os.remove(nrc)
+
+    if failed:
+        print(f'\n실패 {len(failed)}건: {", ".join(failed)}')
+        print('원인을 보려면:  from src.download import probe; probe("train.csv")')
+    from . import config
+    man = os.path.join(config.DATA_DIR, 'MANIFEST.txt')
+    if os.path.exists(man):
+        print('\n체크섬 검증')
+        verify(man)
+    return not failed
 
 
 def verify(manifest_path):
