@@ -93,6 +93,15 @@ WSL2 는 NAT 뒤에 있지만 **바깥으로 나가는 연결은 정상**이라 
 cp -av /home/lee/lga/_serve/. /mnt/e/lga-data/    # 윈도우 E: 드라이브 예시
 ```
 
+> **주의 — 경로 착각으로 한 번 크게 헤맸다.**
+> 서버가 Proxmox 컨테이너(CT) 안에서 돌면, 서빙 경로(`/srv/lga-data`)는
+> **컨테이너 안에만 존재**하고 호스트에는 없다. 호스트의 실제 위치는
+> bind mount 원본(예: `/mnt/storage/lga-data`)이다.
+> SSH 는 호스트로 붙기 때문에 컨테이너 경로로 rsync 하면
+> **호스트 루트에 엉뚱한 새 디렉터리가 생기고 파일이 거기 고립된다.**
+> 서버는 200 을 주는데 파일만 404 가 나는 상태가 된다.
+> rsync 전에 `ssh 서버 'ls -la <경로>'` 로 **그 경로가 실제 서빙 위치인지** 먼저 확인해라.
+
 **옮긴 뒤 서버에서 검증**
 ```bash
 cd /srv/lga-data && sha256sum -c <(awk 'NR>2 {print $3"  "$1}' MANIFEST.txt)
