@@ -18,7 +18,8 @@ import os
 import shutil
 import subprocess
 
-__all__ = ['push_ledger', 'pull_ledgers', 'repo_ledger_dir']
+__all__ = ['push_ledger', 'pull_ledgers', 'repo_ledger_dir',
+           'upload_ledger', 'download_ledgers', 'share']
 
 REPO = os.environ.get('LGA_REPO', '/content/lga-repo')
 REMOTE = 'https://github.com/hyunku9566/lga_data.git'
@@ -100,3 +101,80 @@ def push_ledger(runner, ledger_dir=None, branch='main'):
             _git('pull', '--rebase', '-q', auth, branch)
     print(f'  ❌ 푸시 실패: {r.stderr.strip().splitlines()[-1:]}')
     return False
+
+
+# ────────────────── 서버 방식 (git 대신) ──────────────────
+# 팀원이 각자 Drive 를 쓰기로 해서, 원장을 홈서버 한곳에 모은다.
+# 서버가 /ledgers/ 로 업로드를 받고 /summary.html 로 집계를 서빙한다.
+
+def _server():
+    try:
+        import download as D
+    except ImportError:
+        from . import download as D
+    return D.BASE_URL, D.USER, D._get_password(), D.UA
+
+
+def upload_ledger(runner, ledger_dir=None):
+    """내 원장을 데이터 서버 /ledgers/ 로 올린다."""
+    try:
+        import config as C
+    except ImportError:
+        from . import config as C
+    ledger_dir = ledger_dir or C.LEDGER_DIR
+    safe = ''.join(ch for ch in str(runner) if ch.isalnum() or ch in '-_') or 'unknown'
+    src = os.path.join(ledger_dir, f'ledger_{safe}.csv')
+    if not os.path.exists(src):
+        print('  올릴 원장이 없다 (실험을 먼저 돌려라)')
+        return False
+    base, user, pw, ua = _server()
+    import tempfile
+    fd, nrc = tempfile.mkstemp(prefix='.netrc_')
+    with os.fdopen(fd, 'w') as f:
+        f.write(f'machine {base.split("://")[-1].split("/")[0]} login {user} password {pw}\n')
+    os.chmod(nrc, 0o600)
+    try:
+        r = subprocess.run(['curl', '-fsS', '--netrc-file', nrc, '-A', ua,
+                            '-T', src, f'{base}/ledgers/ledger_{safe}.csv'],
+                           capture_output=True, text=True)
+    finally:
+        os.remove(nrc)
+    if r.returncode == 0:
+        n = sum(1 for _ in open(src, encoding='utf-8-sig')) - 1
+        print(f'  ✅ 원장 {n}건을 서버에 올렸다  →  {base}/summary.html')
+        return True
+    print(f'  ❌ 업로드 실패: {(r.stderr or "").strip().splitlines()[-1:]}')
+    print('     서버에 업로드 기능이 아직 없으면 push_ledger() 로 git 을 써라')
+    return False
+
+
+def download_ledgers(dest=None):
+    """서버에 모인 팀 전체 원장을 받아온다."""
+    try:
+        import config as C
+    except ImportError:
+        from . import config as C
+    dest = dest or os.path.join(C.ROOT, 'team_ledgers')
+    os.makedirs(dest, exist_ok=True)
+    base, user, pw, ua = _server()
+    r = subprocess.run(['curl', '-fsS', '-u', f'{user}:{pw}', '-A', ua, f'{base}/ledgers/'],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print('  서버 원장 목록을 못 받았다'); return dest
+    import re
+    names = sorted(set(re.findall(r'ledger_[^"\'>]+\.csv', r.stdout)))
+    for n in names:
+        subprocess.run(['curl', '-fsS', '-u', f'{user}:{pw}', '-A', ua,
+                        '-o', os.path.join(dest, n), f'{base}/ledgers/{n}'],
+                       capture_output=True)
+    print(f'  원장 {len(names)}개 받음: {", ".join(names) or "없음"}')
+    return dest
+
+
+def share(runner):
+    """서버가 있으면 서버로, 없으면 git 으로. 둘 중 되는 쪽을 쓴다."""
+    if upload_ledger(runner):
+        return 'server'
+    if push_ledger(runner):
+        return 'git'
+    return None
