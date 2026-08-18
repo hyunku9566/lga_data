@@ -48,8 +48,12 @@ def _mount_drive():
 
 
 def setup(runner=None, drive_root=None, repo='/content/lga-repo',
-          local_root='/content/lga', need_optional=False, verbose=True):
-    """실험 준비를 끝내고 config 모듈을 돌려준다."""
+          local_root='/content/lga', need_optional=False, need_data=True,
+          verbose=True):
+    """실험 준비를 끝내고 config 모듈을 돌려준다.
+
+       need_data=False 면 데이터를 확보하지 않는다. 원장만 보는
+       집계 노트북(04)처럼 1.1GB 가 필요 없는 경우에 쓴다."""
     t0 = time.time()
     mydrive = _mount_drive()
     is_colab = mydrive is not None
@@ -77,6 +81,16 @@ def setup(runner=None, drive_root=None, repo='/content/lga-repo',
         from . import config as C
     except ImportError:
         import config as C
+
+    if not need_data:
+        if runner:
+            os.environ['LGA_RUNNER'] = runner
+        if verbose:
+            print(f'준비 완료 (데이터 생략)  {time.time()-t0:.0f}초')
+            print(f'  LEDGER {C.LEDGER_DIR}')
+            if runner:
+                print(f'  RUNNER {runner}')
+        return C
 
     want = list(_NEED) + (list(_OPTIONAL) if need_optional else [])
     dst_of = {'data': C.DATA_DIR, 'cache': C.CACHE_DIR}
