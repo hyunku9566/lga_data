@@ -1,0 +1,130 @@
+
+[    0.0s] ===== Stage 1: 피처 빌드 =====
+[    9.8s] train (1475092, 49)
+[    9.9s] 경기 4868 복원, 역할 as-of 완료
+[   12.8s] 역산 18개
+[   22.3s] 압박성향/제구형 완료
+[   27.0s] 트랙맨 조인 1,765,680행, 투수 764명
+[   40.2s] 트랙맨 구위 16개 (as-of s-1)
+[   47.5s] 저장 /home/lee/lga/features.parquet  shape=(1475092, 93)
+[   47.7s] 피처 90개
+
+[   48.4s] ===== Stage 2: XGBoost GPU 스윕 =====
+[   59.2s] [featset] base48     val2024 raw=  489.0 trend=  553.8 oracle=  566.9
+[   67.9s] [featset] base48     val2023 raw=  266.3 trend=  203.9 oracle=  269.1
+[   82.4s] [featset] deconv     val2024 raw=  615.8 trend=  652.9 oracle=  665.9
+[   94.0s] [featset] deconv     val2023 raw=  441.3 trend=  390.4 oracle=  455.8
+[  110.1s] [featset] full       val2024 raw=  606.9 trend=  657.1 oracle=  670.2
+[  123.1s] [featset] full       val2023 raw=  414.4 trend=  358.1 oracle=  423.6
+[  138.5s] [featset] no_clutch  val2024 raw=  620.7 trend=  669.3 oracle=  682.4
+[  150.9s] [featset] no_clutch  val2023 raw=  397.2 trend=  341.1 oracle=  406.7
+[  165.8s] [featset] no_tm      val2024 raw=  615.8 trend=  652.9 oracle=  665.9
+[  177.6s] [featset] no_tm      val2023 raw=  441.3 trend=  390.4 oracle=  455.8
+
+[  177.6s] --- 랜덤 서치 60회 ---
+[  195.9s] [search  0] avg_raw=  655.9 (24: 701.0/23: 610.7) d4 lr0.08 mcw1000 l2:20  <== BEST
+[  214.0s] [search  1] avg_raw=  510.5 (24: 605.6/23: 415.5) d4 lr0.08 mcw50 l2:5
+[  245.6s] [search  2] avg_raw=  296.2 (24: 453.3/23: 139.1) d4 lr0.08 mcw150 l2:5
+[  270.6s] [search  3] avg_raw=  673.1 (24: 735.1/23: 611.1) d8 lr0.03 mcw1000 l2:20  <== BEST
+[  318.3s] [search  4] avg_raw=  137.9 (24: 275.9/23:   0.0) d4 lr0.08 mcw400 l2:100
+[  349.9s] [search  5] avg_raw=   55.5 (24: 111.0/23:   0.0) d7 lr0.08 mcw400 l2:5
+[  373.6s] [search  6] avg_raw=  612.9 (24: 679.2/23: 546.7) d4 lr0.08 mcw1000 l2:100
+[  440.7s] [search  7] avg_raw=    0.0 (24:   0.0/23:   0.0) d7 lr0.05 mcw400 l2:1
+[  459.2s] [search  8] avg_raw=  740.6 (24: 766.5/23: 714.7) d4 lr0.02 mcw50 l2:5  <== BEST
+[  491.2s] [search  9] avg_raw=  510.0 (24: 610.0/23: 410.0) d4 lr0.05 mcw150 l2:5
+[  552.4s] [search 10] avg_raw=   52.4 (24: 104.7/23:   0.0) d7 lr0.05 mcw400 l2:20
+[  624.7s] [search 11] avg_raw=  159.5 (24: 319.1/23:   0.0) d8 lr0.03 mcw150 l2:100
+[  649.1s] [search 12] avg_raw=  565.5 (24: 660.4/23: 470.5) d8 lr0.05 mcw1000 l2:1
+[  674.7s] [search 13] avg_raw=  703.0 (24: 763.0/23: 643.0) d8 lr0.02 mcw1000 l2:5
+[  701.7s] [search 14] avg_raw=  717.2 (24: 767.6/23: 666.8) d5 lr0.02 mcw150 l2:100
+[  725.3s] [search 15] avg_raw=  625.4 (24: 698.6/23: 552.2) d4 lr0.05 mcw150 l2:20
+[  748.8s] [search 16] avg_raw=  645.4 (24: 712.6/23: 578.2) d7 lr0.03 mcw400 l2:1
+[  802.7s] [search 17] avg_raw=  475.5 (24: 587.5/23: 363.4) d5 lr0.03 mcw1000 l2:20
+[  869.1s] [search 18] avg_raw=    0.0 (24:   0.0/23:   0.0) d7 lr0.05 mcw400 l2:20
+[  931.1s] [search 19] avg_raw=   81.0 (24: 162.0/23:   0.0) d7 lr0.05 mcw1000 l2:100
+[  952.4s] [search 20] avg_raw=  709.7 (24: 773.2/23: 646.1) d6 lr0.03 mcw1000 l2:20
+[  982.7s] [search 21] avg_raw=  696.3 (24: 754.3/23: 638.2) d6 lr0.02 mcw400 l2:100
+[ 1001.2s] [search 22] avg_raw=  738.4 (24: 762.7/23: 714.1) d4 lr0.02 mcw400 l2:100
+[ 1019.7s] [search 23] avg_raw=  741.1 (24: 764.0/23: 718.2) d4 lr0.02 mcw150 l2:5  <== BEST
+[ 1057.8s] [search 24] avg_raw=  153.0 (24: 306.1/23:   0.0) d6 lr0.08 mcw1000 l2:1
+[ 1075.7s] [search 25] avg_raw=  615.4 (24: 669.4/23: 561.5) d4 lr0.08 mcw400 l2:1
+[ 1122.8s] [search 26] avg_raw=  649.9 (24: 716.9/23: 582.9) d4 lr0.02 mcw50 l2:20
+[ 1155.8s] [search 27] avg_raw=  470.4 (24: 573.4/23: 367.4) d7 lr0.03 mcw50 l2:5
+[ 1182.5s] [search 28] avg_raw=  500.9 (24: 606.2/23: 395.7) d5 lr0.05 mcw50 l2:20
+[ 1215.0s] [search 29] avg_raw=  517.5 (24: 610.5/23: 424.5) d7 lr0.03 mcw150 l2:1
+[ 1267.8s] [search 30] avg_raw=    0.0 (24:   0.0/23:   0.0) d5 lr0.08 mcw400 l2:100
+[ 1288.2s] [search 31] avg_raw=  744.8 (24: 785.8/23: 703.7) d5 lr0.02 mcw400 l2:100  <== BEST
+[ 1338.4s] [search 32] avg_raw=  165.5 (24: 331.0/23:   0.0) d5 lr0.05 mcw150 l2:1
+[ 1370.0s] [search 33] avg_raw=  656.5 (24: 743.3/23: 569.6) d7 lr0.02 mcw400 l2:20
+[ 1438.5s] [search 34] avg_raw=    0.0 (24:   0.0/23:   0.0) d7 lr0.05 mcw50 l2:20
+[ 1486.8s] [search 35] avg_raw=    0.0 (24:   0.0/23:   0.0) d8 lr0.08 mcw1000 l2:100
+[ 1553.3s] [search 36] avg_raw=  168.3 (24: 336.7/23:   0.0) d7 lr0.03 mcw400 l2:5
+[ 1606.0s] [search 37] avg_raw=    0.0 (24:   0.0/23:   0.0) d5 lr0.08 mcw150 l2:20
+[ 1650.3s] [search 38] avg_raw=  633.1 (24: 706.5/23: 559.7) d7 lr0.02 mcw1000 l2:100
+[ 1676.0s] [search 39] avg_raw=  157.7 (24: 315.3/23:   0.0) d5 lr0.08 mcw50 l2:1
+[ 1702.2s] [search 40] avg_raw=  711.5 (24: 757.3/23: 665.7) d4 lr0.03 mcw1000 l2:100
+[ 1734.8s] [search 41] avg_raw=  665.5 (24: 727.1/23: 603.9) d4 lr0.03 mcw400 l2:5
+[ 1767.7s] [search 42] avg_raw=  603.2 (24: 666.6/23: 539.8) d7 lr0.02 mcw50 l2:1
+[ 1791.6s] [search 43] avg_raw=  694.6 (24: 752.3/23: 636.9) d7 lr0.03 mcw1000 l2:20
+[ 1819.8s] [search 44] avg_raw=  674.4 (24: 734.9/23: 613.9) d5 lr0.03 mcw400 l2:1
+[ 1857.9s] [search 45] avg_raw=   69.4 (24: 138.7/23:   0.0) d8 lr0.05 mcw50 l2:20
+[ 1919.6s] [search 46] avg_raw=    0.0 (24:   0.0/23:   0.0) d7 lr0.08 mcw400 l2:20
+[ 1990.9s] [search 47] avg_raw=    0.0 (24:   0.0/23:   0.0) d8 lr0.05 mcw1000 l2:5
+[ 2025.0s] [search 48] avg_raw=  633.9 (24: 714.0/23: 553.8) d5 lr0.03 mcw150 l2:100
+[ 2058.9s] [search 49] avg_raw=  628.6 (24: 703.2/23: 554.0) d7 lr0.02 mcw150 l2:1
+[ 2090.9s] [search 50] avg_raw=  283.7 (24: 430.1/23: 137.3) d4 lr0.08 mcw400 l2:1
+[ 2114.3s] [search 51] avg_raw=  398.5 (24: 531.1/23: 265.9) d7 lr0.08 mcw1000 l2:100
+[ 2138.5s] [search 52] avg_raw=  552.1 (24: 641.0/23: 463.2) d4 lr0.08 mcw1000 l2:20
+[ 2173.2s] [search 53] avg_raw=  685.2 (24: 747.2/23: 623.3) d8 lr0.02 mcw1000 l2:1
+[ 2201.8s] [search 54] avg_raw=  677.6 (24: 753.1/23: 602.2) d6 lr0.02 mcw400 l2:1
+[ 2245.9s] [search 55] avg_raw=  586.7 (24: 673.9/23: 499.6) d7 lr0.02 mcw400 l2:5
+[ 2270.3s] [search 56] avg_raw=  736.0 (24: 771.2/23: 700.8) d4 lr0.02 mcw1000 l2:100
+[ 2292.1s] [search 57] avg_raw=  690.3 (24: 745.5/23: 635.0) d6 lr0.03 mcw400 l2:5
+[ 2356.0s] [search 58] avg_raw=    0.0 (24:   0.0/23:   0.0) d7 lr0.08 mcw150 l2:20
+[ 2414.9s] [search 59] avg_raw=  152.7 (24: 305.5/23:   0.0) d6 lr0.05 mcw1000 l2:20
+
+[ 2417.6s] ===== Stage 3: TabM + FiLM =====
+[ 2623.8s] [nn] TabM+FiLM        val2024 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.5352
+[ 2777.5s] [nn] TabM+FiLM        val2023 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4826
+[ 2957.9s] [nn] TabM(FiLM없음)     val2024 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4817
+[ 3098.8s] [nn] TabM(FiLM없음)     val2023 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4848
+[ 3116.4s] [nn] 단일MLP+FiLM       val2024 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.5132
+[ 3130.2s] [nn] 단일MLP+FiLM       val2023 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4896
+[ 3130.5s] !! nn TabM큰모델/2024
+Traceback (most recent call last):
+  File "/home/lee/lga/run_all.py", line 357, in stage3
+    p = torch.sigmoid(net(tn[b], tc[b], tt[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run_all.py", line 319, in forward
+    z = torch.relu(s.l2(z))
+        ^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.50 GiB. GPU 0 has a total capacity of 12.00 GiB of which 375.00 MiB is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 8.15 GiB is allocated by PyTorch, and 2.42 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+[ 3130.8s] !! nn TabM큰모델/2023
+Traceback (most recent call last):
+  File "/home/lee/lga/run_all.py", line 357, in stage3
+    p = torch.sigmoid(net(tn[b], tc[b], tt[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run_all.py", line 319, in forward
+    z = torch.relu(s.l2(z))
+        ^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.50 GiB. GPU 0 has a total capacity of 12.00 GiB of which 375.00 MiB is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 8.15 GiB is allocated by PyTorch, and 2.42 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+[ 3327.9s] [nn] TabM+강한정규화       val2024 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.5433
+[ 3482.4s] [nn] TabM+강한정규화       val2023 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4759
+[ 3665.2s] [nn] TabM작은모델         val2024 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4935
+[ 3808.1s] [nn] TabM작은모델         val2023 raw=    0.0 trend=    0.0 oracle=    0.0 meanp=0.4657
+
+[ 3808.2s] ===== 완료. results/results.csv, results/log.txt =====

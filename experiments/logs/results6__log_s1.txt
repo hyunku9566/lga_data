@@ -1,0 +1,183 @@
+
+======================================================================
+[   0.0m] shard 1/2 on cuda:1
+======================================================================
+[   0.1m] 수치 89 범주 9 증거 P7/B3
+[   0.1m] 전체 138 설정 중 이 샤드 69개
+!! cfg0
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 238, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 189, in train_eval
+    p = torch.sigmoid(net(TN[b], TC[b], TT[b], TPR[b], TPN[b], TBR[b], TBN[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 125, in forward
+    z = torch.relu(l(z))
+        ^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1024.00 MiB. GPU 1 has a total capacity of 8.00 GiB of which 0 bytes is free. Process 17000 has 17179869184.00 GiB memory in use. Of the allocated memory 6.27 GiB is allocated by PyTorch, and 676.03 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+!! cfg1
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 238, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 189, in train_eval
+    p = torch.sigmoid(net(TN[b], TC[b], TT[b], TPR[b], TPN[b], TBR[b], TBN[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 146, in forward
+    return s.out(s.tr(z)[:,0]).squeeze(-1)
+                 ^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 514, in forward
+    output = mod(
+             ^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 907, in forward
+    x = x + self._sa_block(
+            ^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 928, in _sa_block
+    x = self.self_attn(
+        ^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/activation.py", line 1373, in forward
+    attn_output, attn_output_weights = F.multi_head_attention_forward(
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/functional.py", line 6230, in multi_head_attention_forward
+    q, k, v = _in_projection_packed(query, key, value, in_proj_weight, in_proj_bias)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/functional.py", line 5614, in _in_projection_packed
+    proj = linear(q, w, b)
+           ^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 564.00 MiB. GPU 1 has a total capacity of 8.00 GiB of which 0 bytes is free. Process 17000 has 17179869184.00 GiB memory in use. Of the allocated memory 6.67 GiB is allocated by PyTorch, and 452.20 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+!! cfg2
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 238, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 196, in train_eval
+    v = ((torch.sigmoid(net(TN[bi],TC[bi],TT[bi],TPR[bi],TPN[bi],TBR[bi],TBN[bi]))-TY[bi])**2).mean().item()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 125, in forward
+    z = torch.relu(l(z))
+        ^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.02 GiB. GPU 1 has a total capacity of 8.00 GiB of which 0 bytes is free. Process 17000 has 17179869184.00 GiB memory in use. Of the allocated memory 6.78 GiB is allocated by PyTorch, and 150.19 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+!! cfg3
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 238, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 191, in train_eval
+    opt.zero_grad(); loss.backward()
+                     ^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/_tensor.py", line 648, in backward
+    torch.autograd.backward(
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/autograd/__init__.py", line 353, in backward
+    _engine_run_backward(
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/autograd/graph.py", line 824, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.43 GiB. GPU 1 has a total capacity of 8.00 GiB of which 0 bytes is free. Process 17000 has 17179869184.00 GiB memory in use. Of the allocated memory 3.89 GiB is allocated by PyTorch, and 3.04 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+
+
+======================================================================
+[   0.0m] shard 1/2 on cuda:1
+======================================================================
+[   0.2m] 수치 89 범주 9 증거 P7/B3
+[   0.2m] 전체 138 설정 중 이 샤드 69개
+[   8.2m] [  0] TabM  avg=  472.4 24:  560.7 22:  384.0 | k32 h512 L3 plrFalse lr0.002 wd0.001  <== BEST
+!! cfg1
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 247, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 194, in train_eval
+    p = torch.sigmoid(net(TN[b], TC[b], TT[b], TPR[b], TPN[b], TBR[b], TBN[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 146, in forward
+    return s.out(s.tr(z)[:,0]).squeeze(-1)
+                 ^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 514, in forward
+    output = mod(
+             ^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 907, in forward
+    x = x + self._sa_block(
+            ^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 928, in _sa_block
+    x = self.self_attn(
+        ^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/activation.py", line 1373, in forward
+    attn_output, attn_output_weights = F.multi_head_attention_forward(
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/functional.py", line 6230, in multi_head_attention_forward
+    q, k, v = _in_projection_packed(query, key, value, in_proj_weight, in_proj_bias)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/functional.py", line 5614, in _in_projection_packed
+    proj = linear(q, w, b)
+           ^^^^^^^^^^^^^^^
+RuntimeError: CUDA driver error: out of memory
+
+[  11.5m] [  2] TabM  avg=  266.8 24:  366.3 22:  167.4 | k32 h128 L3 plrTrue lr0.002 wd0.001
+[  16.8m] [  3] TabM  avg=  424.0 24:  475.0 22:  372.9 | k64 h128 L2 plrTrue lr0.002 wd0.0001
+[  20.6m] [  4] TabM  avg=  292.6 24:  585.2 22:    0.0 | k8 h512 L3 plrTrue lr0.002 wd0.001
+[  22.3m] [  5] TabM  avg=  271.7 24:  543.3 22:    0.0 | k8 h512 L2 plrFalse lr0.002 wd0.001
+[  29.3m] [  6] TabM  avg=  412.2 24:  585.3 22:  239.2 | k64 h256 L3 plrFalse lr0.002 wd0.001

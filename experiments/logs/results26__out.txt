@@ -1,0 +1,22 @@
+[  0.2m] v10 피처 163
+
+[  0.2m] ===== CatBoost =====
+[  3.8m] CB  현재 d6 n2000 lr0.03                     BSS   745.1
+[  8.7m] CB  d8 n2000 lr0.03                        BSS   639.5
+[ 16.2m] CB  d10 n2000 lr0.03                       BSS   436.7
+[ 26.4m] CB  d8 n4000 lr0.015                       BSS   693.5
+[ 31.4m] CB  d8 n2000 l2=200                        BSS   640.3
+
+[ 31.4m] ===== LightGBM =====
+[ 33.7m] LGB 현재 leaves31 mcs1500                    BSS   796.3
+[ 35.7m] LGB leaves15 mcs1500                       BSS   825.2
+[ 37.7m] LGB leaves15 mcs6000                       BSS   830.8
+[ 40.4m] LGB leaves31 mcs6000                       BSS   812.7
+[ 51.7m] LGB leaves31 mcs12000                      BSS   815.7
+[ 63.8m] LGB leaves63 mcs6000                       BSS   794.8
+[ 70.4m] LGB leaves31 mcs6000 n2500 lr0.005         BSS   814.8
+[ 74.1m] LGB leaves15 mcs6000 n2500 lr0.005         BSS   824.0
+
+[ 74.1m] 완료
+lgb 최고: leaves15 mcs6000  830.8  (현재 794.8)
+cb 최고: 현재 d6 n2000 lr0.03  745.1  (현재 436.7)

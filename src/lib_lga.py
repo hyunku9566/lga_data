@@ -113,6 +113,56 @@ def build_v7(oof=None, b=None):
     return pd.concat([build_base114(b), of], axis=1)
 
 
+def build_pbc(b=None, k=100.0):
+    """pbc_* 4개 — 투수 x 타자손 x 정확볼카운트 계층 이력 (v16 에서 채택, LB +3.30).
+
+    조회키 pitcher_id*1000 + batter_hand*100 + (balls*10+strikes),
+    부모는 (투수 전체율, 리그 카운트율) 반반, 축소강도 k=100.
+    시즌 인과: 시즌 s 행은 season<s 로만 만든다. 행 독립이므로 추론에서도 동일하다.
+
+    로컬의 results45/B3.parquet 과 같은 값을 만든다. 코랩에서 파일 없이 재현하기 위한 것.
+    """
+    b = b or load_base()
+    R, y, season = b['RAW'], b['y'], b['season']
+    pid = R.pitcher_id.values.astype(np.int64)
+    bh = R.batter_hand.values.astype(np.int64)
+    cnt = R.balls_before.values.astype(np.int64) * 10 + R.strikes_before.values.astype(np.int64)
+    key = pid * 1000 + bh * 100 + cnt
+    F = {c: np.full(len(R), np.nan, np.float32)
+         for c in ['pbc_rate', 'pbc_n', 'pbc_logn', 'pbc_delta']}
+    for s_ in range(2020, 2026):
+        tgt = (season == s_); prev = (season < s_)
+        if not tgt.any() or not prev.any():
+            continue
+        mu = float(y[prev].mean())
+        gk = pd.Series(y[prev]).groupby(key[prev]).agg(['sum', 'size'])
+        gp = pd.Series(y[prev]).groupby(pid[prev]).mean()
+        gl = pd.Series(y[prev]).groupby(cnt[prev]).mean()
+        kt, pt, ct = pd.Series(key[tgt]), pd.Series(pid[tgt]), pd.Series(cnt[tgt])
+        n = kt.map(gk['size']).fillna(0).values.astype(np.float64)
+        sy = kt.map(gk['sum']).fillna(0).values.astype(np.float64)
+        pa = pt.map(gp).fillna(mu).values.astype(np.float64)
+        pb = ct.map(gl).fillna(mu).values.astype(np.float64)
+        rate = (sy + (k / 2) * pa + (k / 2) * pb) / (n + k)
+        F['pbc_rate'][tgt] = rate
+        F['pbc_n'][tgt] = n
+        F['pbc_logn'][tgt] = np.log1p(n)
+        F['pbc_delta'][tgt] = rate - pa
+    return pd.DataFrame(F, index=R.index)
+
+
+def build_v16(b=None):
+    """**현재 제출본(v16wB)의 124 피처.** 모든 실험의 기준선은 이것이어야 한다.
+
+    = v7 120 (기준114 + 성분OOF 6) + pbc_* 4
+
+    주의: build_v7() 120 개로 재면 낡은 기준선이다. v16 에서 pbc_* 가 채택돼
+    LB +3.30 을 냈으므로, 그 위에서 재지 않으면 이득이 중복 계산된다.
+    """
+    b = b or load_base()
+    return pd.concat([build_v7(b=b), build_pbc(b=b)], axis=1)
+
+
 # ──────────────────────── 숨은 라벨 역산 ────────────────────────
 def _diff_labels(RAW, count_col, rate_cols, prefix=''):
     """누적비율 x 누적개수를 차분해 투구별 개별 라벨을 복원한다.

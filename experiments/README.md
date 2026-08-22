@@ -1,35 +1,98 @@
-# 실험 스크립트
+# 실험 색인
 
-각 실험이 **무엇을 왜 물었고 답이 무엇이었는지**. 수치는 전부 폴드2024 기준이다.
+로컬에서 돌린 실험 스크립트와 **결과 로그 전부**를 여기에 모았다.
 
-> **경로 주의.** 개발 PC 경로(`/home/lee/lga/`)가 하드코딩돼 있다.
-> 결과 재현성을 위해 원본 그대로 옮겼다. 코랩에서 새 실험을 하려면
-> `src/lib_lga.py` + `colab/03_run_experiments.ipynb` 를 써라.
+- `run*.py` — 현행 프로토콜(`src/lib_lga.py`) 기준 실험 59건
+- `archive/` — 그 이전 구버전 실험 18건 (경로·규약이 달라 그대로는 안 돌아간다)
+- `logs/` — 결과 로그 287개. 파일명은 `<결과디렉토리>__<원본파일명>` 이다
 
-| 스크립트 | 물은 것 | 답 |
+**읽는 법**: 스크립트 상단 docstring 에 "무엇을 왜 쟀는가" 와 판정이 적혀 있다.
+수치는 `logs/` 에서 확인한다. 종합 결론은 [`../docs/CEILING.md`](../docs/CEILING.md) 와
+[`../docs/FINDINGS.md`](../docs/FINDINGS.md) 에 있다.
+
+---
+
+## 현행 실험
+
+| 스크립트 | 내용 | 로그 |
 |---|---|---|
-| `run20.py` | 구종 라벨을 역산했는데 값어치가 있나 | **오라클 +183, 합법 예측 +1.8.** 구종은 규칙상 금지고 투구 전 예측은 정확도 54.9%(최빈 52.3%)에 그친다 |
-| `run21.py` | `y = ¬rev ∧ ¬mid ∧ Z` 를 인수분해하면 나은가 | **기각.** 단독 −29.2, 블렌딩해도 폴드2022 −8.2 |
-| `run22.py` | 병목이 모델인가 데이터인가 | **둘 다.** depth 6→10 +10.5 (모델 과소적합), 무작위분할 1146.4 vs 시간분할 818.9 (시간 일반화가 진짜 병목, 단 누수로 부풀려진 수치) |
-| `run23.py` | XGB 하이퍼파라미터 재탐색 | 폴드2024 +41.5. **그러나 폴드2023 과 Spearman −0.806 으로 역전.** 27개 중 두 폴드 동시 개선 0개. LB 실측은 +2.99 |
-| `run24.py` | 최근성 가중 피처 / 커리어 축소 / 콜드스타트 | G1 +3.9, G2 +2.6, **G3 콜드스타트 −1.5 기각.** 튜닝 후엔 G1+G2 도 +1.9 로 줄어 최종 채택 안 함 |
-| `run25.py` | 2024(ABS) 에 가중을 몰아줘야 하나 | **기각.** 반감기 0.25 는 608.7, ×10 은 635.2 로 급락. 현재 hl=2.0(737.6) 이 이미 최적 |
-| `run26.py` | LGB / CatBoost 재탐색 | **LGB 는 작을수록 좋다** (leaves31 796.3 → leaves15 830.8). **CatBoost 는 깊을수록 붕괴** (d6 745 → d10 437) |
-| `run27.py` | 자원 안 아끼고 더 무거운 학습기 | n8000/lr0.002 870.4 로 최고. dart −2.1, exact −10.8, linear_tree 실패 |
-| `run28.py` | v10 구성 확정 (피처셋 · 트리 수 · 모델 크기) | G1+G2 는 +1.9 뿐이라 기각. 모델 크기는 7.5MB 로 우려한 것보다 훨씬 작음 |
-| `pool_v2.py` | 블렌드 풀을 정직하게 재선택하면 나은가 | **기각 −23.9.** 전진선택이 작은 풀을 뽑아 그 폴드에 과적합. 크기가 구성보다 중요 |
+| [`run20.py`](run20.py) | 20차 — 구종 라벨 역산의 값어치 측정 (근본 재검토) | `logs/results20__*` (2개) |
+| [`run21.py`](run21.py) | 21차 — 타깃 인수분해 (지금까지 안 해본 마지막 구조적 아이디어) | `logs/results21__*` (2개) |
+| [`run22.py`](run22.py) | 22차 — 병목 진단: 모델인가 데이터인가 | `logs/results22__*` (2개) |
+| [`run23.py`](run23.py) | 23차 — 하이퍼파라미터 재탐색 (22차에서 과소적합 확인됨) | `logs/results23__*` (3개) |
+| [`run24.py`](run24.py) | 24차 — 시간 일반화 3종 (22차 진단이 가리킨 방향) | `logs/results24__*` (3개) |
+| [`run25.py`](run25.py) | 25차 — ABS regime 대응 (가장 중요한 구조 문제) | `logs/results25__*` (2개) |
+| [`run26.py`](run26.py) | 26차 — LGB / CatBoost 재탐색 (마지막 미탐색 영역) | `logs/results26__*` (3개) |
+| [`run27.py`](run27.py) | 27차 — 자원 제약 없는 '무겁고 구조적으로 다른' 학습기 탐색 | `logs/results27__*` (3개) |
+| [`run28.py`](run28.py) | 28차 — v10 구성 확정용 최종 확인 | `logs/results28__*` (3개) |
+| [`run29_cmp_retune.py`](run29_cmp_retune.py) | 29차 — 성분모델(cmp_*) 재튜닝 | `logs/results29__*` (3개) |
+| [`run30_configdiv.py`](run30_configdiv.py) | 30차 — 시드 다양성 vs 설정 다양성 | `logs/results30__*` (2개) |
+| [`run31_blend2fold.py`](run31_blend2fold.py) | 31차-B — 블렌드 가중치 질문을 '두 폴드 동시'로 재판정 (CPU 전용, 재학습 없음) | `logs/results31__*` (7개) |
+| [`run31_blend_newhpo.py`](run31_blend_newhpo.py) | 31차-D — 출시본 HPO 로 블렌드 재판정 + HPO x 블렌드 상호작용 검증 | `logs/results31__*` (7개) |
+| [`run31_fold2023.py`](run31_fold2023.py) | 31차 — 폴드2023 보조 검증 (선택 편향 진단) | `logs/results31__*` (7개) |
+| [`run31_newhpo_folds.py`](run31_newhpo_folds.py) | 31차-C — 실제 출시된 모델(v10 HPO)의 폴드2022/2023 예측 생성 | `logs/results31__*` (7개) |
+| [`run32_lgb_configdiv.py`](run32_lgb_configdiv.py) | 32차 — LightGBM 설정 다양성(Configuration Diversity) 검증 | `logs/results32__*` (1개) |
+| [`run33_count_interactions.py`](run33_count_interactions.py) | 33차 — 볼카운트 및 위기상황 상호작용 피처(Count & Stress Interaction Features) 검증 | `logs/results33__*` (2개) |
+| [`run34_pitch_conditioning.py`](run34_pitch_conditioning.py) | 34차 — 구종별(Fastball / Breaking / Offspeed) 제구 분해 및 엔트로피 피처 검증 | `logs/results34__*` (2개) |
+| [`run35_catboost_tuning.py`](run35_catboost_tuning.py) | 35차 — CatBoost 아키텍처 다양성 및 시드 앙상블 검증 | `logs/results35__*` (1개) |
+| [`run36_brier_objective.py`](run36_brier_objective.py) | 36차 — 트리를 Brier(제곱오차)로 직접 최적화하면 나은가 | `logs/results36__*` (1개) |
+| [`run37_residual_decomp.py`](run37_residual_decomp.py) | 37차 — 현재 모델 잔차에 구조가 남아 있는가 (천장 판별) | — |
+| [`run38_pitchtype_v2.py`](run38_pitchtype_v2.py) | 38차 — 구종 예측 모델 재구축 (옛 하이퍼파라미터로 남아 있던 마지막 축) | `logs/results38__*` (5개) |
+| [`run39_shr_sweep.py`](run39_shr_sweep.py) | 39차 — 투수x상황 축소강도(SHR) 스윕 + 표본수 피처 | `logs/results39__*` (9개) |
+| [`run40_trackman_residual_audit.py`](run40_trackman_residual_audit.py) | 40차 — TrackMan 고정 프로필의 시간외 잔차 신호 감사 (CPU 전용). | `logs/results40__*` (2개) |
+| [`run41_exact_count.py`](run41_exact_count.py) | 41차 — 투수 × 정확 볼카운트(12개) 계층적 과거 이력 검증 | `logs/results41__*` (2개) |
+| [`run42_exact_count_comp.py`](run42_exact_count_comp.py) | 42차 — 투수 × 정확 볼카운트(12개) 4대 물리 성분 이력 확장 검증 | `logs/results42__*` (2개) |
+| [`run43_blend_diag.py`](run43_blend_diag.py) | 43차 — 왜 CV 이득이 LB 로 전이되지 않는가 | `logs/results43__*` (2개) |
+| [`run44_tm_countmix.py`](run44_tm_countmix.py) | 44차 — 투수 x 볼카운트별 구종배합 / 물리 프로파일  (GPU0) | `logs/results44__*` (1개) |
+| [`run45_batter_axis.py`](run45_batter_axis.py) | 45차 — 타자축 및 교차 이력  (GPU1) | `logs/results45__*` (2개) |
+| [`run46_b3_confirm.py`](run46_b3_confirm.py) | 46차 — B3(투수 x 타자손 x 카운트) 확정 검증 | `logs/results46__*` (1개) |
+| [`run47_pbc_comp.py`](run47_pbc_comp.py) | 47차 — pbc 키를 성분 라벨에 적용  (GPU0) | `logs/results47__*` (2개) |
+| [`run48_pbc_variants.py`](run48_pbc_variants.py) | 48차 — pbc 계열 변형  (GPU1) | `logs/results48__*` (2개) |
+| [`run49_lgb_retune.py`](run49_lgb_retune.py) | 49차 — LightGBM 재탐색 (블렌드 주력 축이 된 뒤 처음) | `logs/results49__*` (22개) |
+| [`run50_lgb_stage2.py`](run50_lgb_stage2.py) | 50차 (49차 2단계) — LightGBM 재탐색 (블렌드 주력 축이 된 뒤 처음) | `logs/results50__*` (23개) |
+| [`run51_lgb_stage3.py`](run51_lgb_stage3.py) | 51차 (49차 3단계 — extra_trees 기준) — LightGBM 재탐색 (블렌드 주력 축이 된 뒤 처음) | `logs/results51__*` (19개) |
+| [`run52_cb_retune.py`](run52_cb_retune.py) | 52차 — CatBoost 재탐색 (블렌드 3번째 축, 한 번도 제대로 튜닝 안 함) | `logs/results52__*` (17개) |
+| [`run53_et_axis.py`](run53_et_axis.py) | 53차 — ExtraTrees 를 5번째 블렌드 축으로 | `logs/results53__*` (2개) |
+| [`run54_cb_stage2.py`](run54_cb_stage2.py) | 54차 — CatBoost 2단계 (depth4 + bagging_temperature 조합) (블렌드 3번째 축, 한 번도 제대로 튜닝 안 함) | `logs/results54__*` (15개) |
+| [`run55_lgb_stage4.py`](run55_lgb_stage4.py) | 55차 (LGB 4단계 — leaves15+ET 기준) — LightGBM 재탐색 (블렌드 주력 축이 된 뒤 처음) | `logs/results55__*` (17개) |
+| [`run56_blend_verify.py`](run56_blend_verify.py) | 56차 — 새 LGB/CB 설정의 블렌드 수준 검증 | `logs/results56__*` (1개) |
+| [`run57_fold2022_contam.py`](run57_fold2022_contam.py) | 57차 — 폴드2022 는 regime 때문이 아니라 F리그 오염 때문에 이상했던 것인가 | `logs/results57__*` (2개) |
+| [`run58_platoon.py`](run58_platoon.py) | 58차 — 투수 x 타자손(플래툰) 전용 계층 피처 | `logs/results58__*` (2개) |
+| [`run59_pbc_rehier.py`](run59_pbc_rehier.py) | 59차 — pbc_* 의 축소 경로를 고친다 (병렬 추가가 아니라 대체) | `logs/results59__*` (2개) |
+| [`run60_hindsight_probe.py`](run60_hindsight_probe.py) | 60차 — [진단 전용, 제출 금지] test 내부 투수별 집계의 값어치를 정량화 | `logs/results60__*` (2개) |
+| [`run61_regimefold.py`](run61_regimefold.py) | 61차 — regime 일치 폴드: 2024 를 학습에 넣고 2024 를 맞힌다 | `logs/results61__*` (1개) |
+| [`run62_statespace.py`](run62_statespace.py) | 62차 — 상태공간 투수능력 추정기 (기존 GBDT 구조와 무관한 별도 모형) | `logs/results62__*` (1개) |
+| [`run63_hier.py`](run63_hier.py) | 63차 — 처음부터 다시: 계층 베이즈 모형 (기존 124피처 파이프라인 미사용) | `logs/results63__*` (3개) |
+| [`run63b_hier.py`](run63b_hier.py) | 63차b — 계층 베이즈, 각 관측을 '그 시절 리그 수준'으로 디민 후 수축 | `logs/results63__*` (3개) |
+| [`run63c_hier.py`](run63c_hier.py) | 63차b — 계층 베이즈, 각 관측을 '그 시절 리그 수준'으로 디민 후 수축 | `logs/results63__*` (3개) |
+| [`run64_fclean.py`](run64_fclean.py) | 64차 — 1군/2군 오염 보정 (주최측 asof 는 R+F 를 섞어 누적한다) | `logs/results64__*` (2개) |
+| [`run65_dropF.py`](run65_dropF.py) | 65차 — F(2군) 를 학습에서 전부 뺀다 | `logs/results65__*` (2개) |
+| [`run66_fclean2.py`](run66_fclean2.py) | 64차 — 1군/2군 오염 보정 (주최측 asof 는 R+F 를 섞어 누적한다) | `logs/results66__*` (2개) |
+| [`run67_prior.py`](run67_prior.py) | 67차 — 수축 사전확률(prior)이 낡았다: 고정상수 -> 시즌 인과 추세외삽 | `logs/results67__*` (2개) |
+| [`run_dcn_v2_sota.py`](run_dcn_v2_sota.py) | Deep & Cross Network v2 (DCN-v2) | — |
+| [`run_ft_pure.py`](run_ft_pure.py) | 트리 제거 FT-Transformer 순수 | — |
+| [`run_ft_transformer_sota.py`](run_ft_transformer_sota.py) | Turing GPU Compatible FT-Transformer | — |
+| [`run_ftt_clean.py`](run_ftt_clean.py) | FT-Transformer 정식 재측정 스크립트 | — |
+| [`run_nn_pure.py`](run_nn_pure.py) | 트리 완전 제거 순수 NN 파이프라인 | — |
+| [`run_pitchformer_sota.py`](run_pitchformer_sota.py) | 차세대 최신 딥러닝 아키텍처 [PitchFormer-SwiGLU] 구현 및 실측 | — |
 
-## 이 실험들에서 배운 것
+---
 
-`docs/PROTOCOL.md` 에 규칙으로 정리돼 있다. 요약하면:
+## 특히 중요한 것
 
-1. 폴드2024 하나로 고르고 같은 폴드로 검증하면 전이율이 0.06배까지 떨어진다
-2. 블렌드 가중치는 CV 로 고르면 안 된다 (CV +14.2 인데 LB −11.66 이었다)
-3. 새 정보를 넣는 것만 통했고, 같은 정보를 다르게 배열하는 시도는 전부 실패했다
+| 실험 | 결론 |
+|---|---|
+| `run29_cmp_retune.py` | 성분모델 재튜닝 **기각**. 성분 예측이 좋아지면 y 가 나빠진다 |
+| `run46_b3_confirm.py` | `pbc_*` 채택 근거. 유일하게 LB 를 올린 피처 (+3.30) |
+| `run56_blend_verify.py` | v17 블렌드 검증. CV 는 좋았으나 **LB -5.84** |
+| `run57_fold2022_contam.py` | F리그 오염 검사. 현행 마스크가 옳다 |
+| `run58_platoon.py` / `run59_pbc_rehier.py` | 투수x타자손 축. 잔차 202.9 는 실재하나 전환 실패 |
+| `run63c_hier.py` | 계층 베이즈(from scratch). 단독 407/488 |
+| `run64_fclean.py` | **1군/2군 오염 보정.** 폴드2024 +5.8 — 현재 유일 생존 후보 |
+| `run67_prior.py` | 수축 사전확률이 낡았다는 실태 발견 (수정 시도는 실패) |
+| `run_nn_pure.py` / `run_ftt_clean.py` | 순수 NN. 조기중단 홀드아웃 누수 문제 → `docs/TREE_VS_DL.md` |
 
-## 아직 안 돌린 것
+## 재현
 
-- `run29_cmp_retune.py` — 성분모델 4개가 아직 옛 하이퍼파라미터(d6/mcw1500/n600)로 남은 유일한 축
-- `run30_configdiv.py` — 시드 다양성 vs 설정 다양성
-
-둘 다 `src/lib_lga.py` 의 `bench2` 를 쓰도록 작성돼 있고 두 폴드 동시 개선 조건을 강제한다.
+로컬은 `python run57_fold2022_contam.py` 로 바로 돈다 (`/home/lee/lga` 기준).
+코랩은 [`../colab/05_hpo.ipynb`](../colab/05_hpo.ipynb) 또는 `03_run_experiments.ipynb` 를 써라.

@@ -25,3 +25,9 @@ __pycache__/
 !assets/
 !assets/*.csv
 !assets/*.json
+
+# 실험 결과 로그·표 — 소용량 텍스트다. 대회 원본 데이터가 아니므로 포함한다.
+!experiments/logs/
+!experiments/logs/*.csv
+!experiments/logs/*.txt
+!experiments/logs/*.json

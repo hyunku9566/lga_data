@@ -1,0 +1,21 @@
+[  0.2m] v7=(1475092, 120), aligned TrackMan=(1189246, 29), CPU threads=30
+[  0.3m] TM profile 46 columns; coverage by season
+[  0.3m]   2023: mapped=0.857, median_n=2453
+[  0.3m]   2024: mapped=0.803, median_n=2556[  1.8m] fold2023: inner baseline 2020 (237,413->220,874)
+[  2.3m] fold2023: inner baseline 2021 (481,500->221,227)
+[  3.2m] fold2023: inner baseline 2022 (728,588->217,024)
+[  3.3m] fold2023: baseline=774.06, correction=707.92, delta=-66.14; resid corr pearson=-0.0013, spearman=0.0150; mapped=0.857
+[  3.3m]   all    n=188,435 correction MSE delta=+0.0001929
+[  3.3m]   n>=200 n=182,189 correction MSE delta=+0.0001908
+[  3.3m]   n>=800 n=161,057 correction MSE delta=+0.0002003
+[  3.3m]   n<200  n=6,246 correction MSE delta=+0.0002532
+[  4.9m] fold2024: inner baseline 2020 (237,413->220,874)
+[  5.5m] fold2024: inner baseline 2021 (481,500->221,227)
+[  6.3m] fold2024: inner baseline 2022 (728,588->217,024)
+[  7.3m] fold2024: inner baseline 2023 (870,752->245,525)
+[  7.5m] fold2024: baseline=854.12, correction=775.09, delta=-79.03; resid corr pearson=0.0007, spearman=-0.0098; mapped=0.803
+[  7.5m]   all    n=179,437 correction MSE delta=+0.0002460
+[  7.5m]   n>=200 n=173,056 correction MSE delta=+0.0002509
+[  7.5m]   n>=800 n=150,773 correction MSE delta=+0.0002863
+[  7.5m]   n<200  n=6,381 correction MSE delta=+0.0001120
+[  7.5m] FINAL both-fold residual signal: False

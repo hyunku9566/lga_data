@@ -1,0 +1,31 @@
+[  0.0m] 사용 디바이스: cuda:1
+[  0.4m] 피처 준비 완료: 수치형 111개, 범주형 9개 (총 120개 토큰)
+[  0.4m] ===== FT-Transformer 듀얼 폴드 검증 =====
+[  0.4m] 
+--- [폴드 2024] FT-Transformer 학습 시작 (피처 토큰 간 Self-Attention) ---
+[  0.0m] 사용 디바이스: cuda:1
+[  0.4m] ===== FT-Transformer 듀얼 폴드 검증 =====
+[  0.4m] 
+--- [폴드 2024] FT-Transformer 학습 시작 (FlashAttention) ---
+[  0.0m] 사용 디바이스: cuda:1
+[  0.5m] ===== FT-Transformer 듀얼 폴드 검증 =====
+[  0.6m] 
+--- [폴드 2024] FT-Transformer 학습 시작 (피처 토큰 간 Self-Attention) ---
+[  5.1m]   Epoch  1/6 (268.5s) | Loss: 0.4953 | BSS: 712.68
+[  9.6m]   Epoch  2/6 (274.8s) | Loss: 0.4941 | BSS: 776.94
+[ 14.2m]   Epoch  3/6 (271.8s) | Loss: 0.4936 | BSS: 753.09
+[ 18.8m]   Epoch  4/6 (275.1s) | Loss: 0.4931 | BSS: 556.17
+[ 23.1m]   Epoch  5/6 (260.3s) | Loss: 0.4926 | BSS: 565.45
+[ 25.6m]   Epoch  6/6 (151.8s) | Loss: 0.4922 | BSS: 596.69
+[ 25.6m] 
+--- [폴드 2023] FT-Transformer 학습 시작 (피처 토큰 간 Self-Attention) ---
+[ 27.6m]   Epoch  1/6 (115.0s) | Loss: 0.5533 | BSS: 604.84
+[ 29.5m]   Epoch  2/6 (114.3s) | Loss: 0.5518 | BSS: 264.85
+[ 31.4m]   Epoch  3/6 (115.0s) | Loss: 0.5513 | BSS: 587.25
+[ 33.3m]   Epoch  4/6 (115.4s) | Loss: 0.5509 | BSS: 589.61
+[ 35.2m]   Epoch  5/6 (114.5s) | Loss: 0.5503 | BSS: 399.51
+[ 37.1m]   Epoch  6/6 (114.6s) | Loss: 0.5500 | BSS: 431.05
+[ 37.1m] 
+===== FT-Transformer 최종 결과 =====
+[ 37.1m] 2024 폴드: 776.94
+[ 37.1m] 2023 폴드: 604.84

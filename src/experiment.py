@@ -46,19 +46,29 @@ __all__ = ['run_experiment', 'DEFAULT_XGB', 'get_baseline', 'ledger_path',
 
 # ────────────────────────── 상수 ──────────────────────────
 
-# 현재 제출본(v10a)의 XGB 설정. 기준선이자 스윕의 출발점.
-DEFAULT_XGB = dict(n_estimators=600, learning_rate=0.008, max_depth=6, min_child_weight=1500,
+# 현재 제출본(v16wB)의 XGB 설정. 기준선이자 스윕의 출발점.
+# 2026-08-22 갱신: 종전에는 v10a 시절(d6/mcw1500/n600/lr.008)이 박혀 있었다.
+# 낡은 기준선에 대고 튜닝하면 이미 채택된 이득을 다시 세게 되므로 반드시 현행을 써야 한다.
+DEFAULT_XGB = dict(n_estimators=2000, learning_rate=0.005, max_depth=10, min_child_weight=6000,
                    subsample=0.7, colsample_bytree=0.5, reg_lambda=50., reg_alpha=1.,
                    tree_method='hist', eval_metric='logloss', verbosity=0)
+# 참고용 옛 설정 (비교 기준이 필요할 때만)
+LEGACY_XGB_V10A = dict(n_estimators=600, learning_rate=0.008, max_depth=6, min_child_weight=1500,
+                       subsample=0.7, colsample_bytree=0.5, reg_lambda=50., reg_alpha=1.,
+                       tree_method='hist', eval_metric='logloss', verbosity=0)
 
 BASELINE_SEEDS = 5
 HL = 2.0
 
 # 실측 전이율. CV 이득에 곱해 LB 기대범위를 만든다.
-#   v8  CV +4.3  -> LB +0.9   (0.21배)
-#   v9  CV +5.3  -> LB +2.8   (0.53배)
-#   HPO CV +48   -> LB +3.0   (0.06배)
-TRANSFER = {'낙관': 0.5, '비관': 0.06}
+#   v8   CV +4.3  -> LB +0.9   (0.21배)
+#   v9   CV +5.3  -> LB +2.8   (0.53배)
+#   HPO  CV +48   -> LB +3.0   (0.06배)
+#   pbc  CV +6.1  -> LB +3.3   (0.54배)   <- 피처 추가
+#   v17  CV +6.9  -> LB **-5.84**         <- 모델설정 변경, 부호가 반대
+# 2026-08-22: 모델 설정 변경은 v7 이후 **7전 7패**다 (v10/v11a/v11c/v12/v13/v17).
+# 성공한 것은 피처 추가(pbc_*)뿐이다. 하이퍼파라미터 스윕의 기대값은 0 에 가깝다고 보라.
+TRANSFER = {'낙관': 0.5, '비관': 0.0}
 
 BLEND_WARNING = (
     '※ 이 LB 기대범위는 모델/피처 변경에만 적용된다. 블렌드 가중치 변경은 전이율이 '
@@ -112,7 +122,7 @@ def get_baseline(force=False, verbose=True):
         return d
     if verbose:
         print(f'기준선 계산 중 (시드 {BASELINE_SEEDS} x 폴드 2) — 처음 한 번만, 10~20분')
-    Xa = L.build_v7()
+    Xa = L.build_v16()          # 124 = v7 120 + pbc 4 (현재 제출본과 동일)
     prm = dict(DEFAULT_XGB)
     t0 = time.time()
     s24 = _seed_scores(Xa, prm, 2024, BASELINE_SEEDS)
@@ -260,9 +270,12 @@ def _grid_rows(grid):
 
 
 # 부스터별 현재 설정 (v10a 제출본 기준). 스윕의 출발점이자 자기 기준선.
+# 현재 제출본(v16wB) 의 세 축 설정.
+# 주의: 49~56차에서 찾은 LGB(extra_trees/cs0.4) + CB(d4/bagtemp2/l2_500) 신설정은
+#       CV 상 크게 좋았으나 **LB 에서 -5.84 로 실패했다(v17)**. 그래서 현행은 v16 설정이다.
 CURRENT = {
     'xgb': DEFAULT_XGB,
-    'lgb': dict(n_estimators=1200, learning_rate=0.01, num_leaves=31, min_child_samples=1500,
+    'lgb': dict(n_estimators=1200, learning_rate=0.01, num_leaves=15, min_child_samples=6000,
                 subsample=0.7, subsample_freq=1, colsample_bytree=0.5, reg_lambda=50.),
     'cb':  dict(iterations=2000, learning_rate=0.03, depth=6, l2_leaf_reg=50.),
 }
@@ -320,7 +333,7 @@ def run_experiment(name, kind='hparam', grid=None, base_params=None, features=No
     kind        'hparam' | 'feature' | 'blend'
     grid        하이퍼파라미터 격자. {'max_depth':[6,8,10], ...}
     base_params 격자에 덮어씌울 기본 설정 (기본: 해당 model 의 CURRENT)
-    features    평가에 쓸 피처 DataFrame. None 이면 v7 120개
+    features    평가에 쓸 피처 DataFrame. None 이면 v16 124개 (현재 제출본과 동일)
     seeds       시드 수 (많을수록 노이즈 막대가 줄어든다)
     runner      팀원 이름 — 원장 파일이 팀원별로 갈린다
     feature_fn  kind='feature' 일 때 fn(RAW, X98, base) -> DataFrame.
@@ -339,7 +352,7 @@ def run_experiment(name, kind='hparam', grid=None, base_params=None, features=No
 
     base = baseline or get_baseline(verbose=verbose)
     b = L.load_base()
-    Xbase = L.build_v7(b=b) if features is None else features
+    Xbase = L.build_v16(b=b) if features is None else features
 
     if kind == 'feature':
         if feature_fn is None:

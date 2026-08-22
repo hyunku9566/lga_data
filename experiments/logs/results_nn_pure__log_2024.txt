@@ -1,0 +1,24 @@
+[  0.0m] === 트리제거 순수 NN vs=2024 dev=cuda:0 ===
+[  0.0m] 피처: 118 (base114 + pbc4) OOF 없음
+[  0.2m] BASE114 (1475092, 114)
+[  0.3m] X118 (1475092, 118) cols=['m2_press_shift', 'm2_press_velo', 'pbc_rate', 'pbc_n', 'pbc_logn', 'pbc_delta']
+[  0.3m] 성분라벨 역산 완료
+[  0.3m] 폴드2024 train 1,049,301 hold 66,976 val 223,497
+[  0.6m] device=cuda:0 CARD=[793, 831, 14] NUM=109
+[  0.6m] val base 0.24989 mean 0.4897
+[  1.1m] Epoch 1/40 tr 0.75408 hold 0.51416 ★ lr 7.99e-04
+[  1.7m] Epoch 2/40 tr 0.75084 hold 0.51366 ★ lr 7.95e-04
+[  2.2m] Epoch 3/40 tr 0.75016 hold 0.51356 ★ lr 7.89e-04
+[  2.7m] Epoch 4/40 tr 0.74943 hold 0.51312 ★ lr 7.80e-04
+[  3.2m] Epoch 5/40 tr 0.74878 hold 0.51319 (1/6) lr 7.70e-04
+[  3.7m] Epoch 6/40 tr 0.74796 hold 0.51324 (2/6) lr 7.56e-04
+[  4.3m] Epoch 7/40 tr 0.74698 hold 0.51301 ★ lr 7.41e-04
+[  4.8m] Epoch 8/40 tr 0.74572 hold 0.51315 (1/6) lr 7.24e-04
+[  5.3m] Epoch 9/40 tr 0.74417 hold 0.51377 (2/6) lr 7.04e-04
+[  5.8m] Epoch 10/40 tr 0.74230 hold 0.51442 (3/6) lr 6.83e-04
+[  6.3m] Epoch 11/40 tr 0.74013 hold 0.51470 (4/6) lr 6.60e-04
+[  6.8m] Epoch 12/40 tr 0.73779 hold 0.51517 (5/6) lr 6.35e-04
+[  7.3m] Epoch 13/40 tr 0.73500 hold 0.51650 (6/6) lr 6.09e-04
+[  7.3m] early stop at 13
+[  7.3m] VAL BSS 297.7 (base 0.24989)
+[  7.3m] saved pred/model /home/lee/lga/results_nn_pure/

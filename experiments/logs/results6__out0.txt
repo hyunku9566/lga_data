@@ -1,0 +1,119 @@
+
+======================================================================
+[   0.0m] shard 0/2 on cuda:0
+======================================================================
+[   0.2m] 수치 89 범주 9 증거 P7/B3
+[   0.2m] 전체 138 설정 중 이 샤드 69개
+[   0.7m] [  0] TabM  avg=  400.9 24:  507.8 22:  294.0 | k8 h128 L3 plrFalse lr0.002 wd0.001  <== BEST
+[   3.2m] [  1] TabM  avg=  439.0 24:  703.7 22:  174.4 | k8 h512 L2 plrTrue lr0.002 wd0.001  <== BEST
+[   4.7m] [  2] TabM  avg=  453.0 24:  636.8 22:  269.3 | k8 h512 L2 plrFalse lr0.002 wd0.0001  <== BEST
+[   7.3m] [  3] TabM  avg=  389.0 24:  507.6 22:  270.5 | k64 h128 L2 plrFalse lr0.002 wd0.01
+[   7.7m] [  4] Hier  avg=  439.0 24:  552.7 22:  325.2 | h64 lr0.001 wd0.001
+[   7.9m] [  5] Hier  avg=  552.6 24:  664.7 22:  440.5 | h256 lr0.001 wd0.01  <== BEST
+[  28.0m] [  6] TabM  avg=  171.5 24:  241.7 22:  101.2 | k64 h512 L2 plrTrue lr0.002 wd0.01
+[  37.8m] [  7] TabM  avg=  115.2 24:  221.8 22:    8.5 | k32 h512 L2 plrTrue lr0.002 wd0.001
+[  40.1m] [  8] TabM  avg=  499.1 24:  543.1 22:  455.2 | k32 h256 L2 plrFalse lr0.002 wd0.001
+[  46.6m] [  9] TabM  avg=  344.4 24:  557.4 22:  131.4 | k64 h256 L3 plrFalse lr0.002 wd0.01
+[  78.8m] [ 10] FTT   avg=  537.3 24:  539.9 22:  534.7 | d32 L4 heads4 lr0.001 wd0.0001
+[  79.9m] [ 11] TabM  avg=  128.9 24:  174.4 22:   83.4 | k8 h256 L3 plrFalse lr0.002 wd0.0001
+[  86.7m] [ 12] TabM  avg=  302.1 24:  604.3 22:    0.0 | k32 h256 L2 plrTrue lr0.002 wd0.001
+[  93.2m] [ 13] TabM  avg=  264.6 24:  529.2 22:    0.0 | k32 h128 L3 plrTrue lr0.002 wd0.0001
+[  94.1m] [ 14] TabM  avg=  141.6 24:  283.1 22:    0.0 | k8 h256 L2 plrFalse lr0.002 wd0.01
+[  94.6m] [ 15] TabM  avg=  409.6 24:  527.2 22:  292.0 | k8 h128 L3 plrFalse lr0.002 wd0.01
+[ 100.2m] [ 16] TabM  avg=  334.4 24:  495.0 22:  173.8 | k32 h256 L3 plrFalse lr0.002 wd0.0001
+[ 106.7m] [ 17] TabM  avg=   53.4 24:   67.1 22:   39.7 | k64 h256 L2 plrFalse lr0.002 wd0.001
+[ 108.8m] [ 18] TabM  avg=  507.8 24:  625.1 22:  390.5 | k8 h512 L3 plrFalse lr0.002 wd0.0001
+[ 117.6m] [ 19] TabM  avg=  366.0 24:  603.9 22:  128.1 | k64 h256 L2 plrTrue lr0.002 wd0.01
+[ 120.9m] [ 20] TabM  avg=  346.7 24:  537.2 22:  156.2 | k32 h256 L3 plrFalse lr0.002 wd0.001
+!! cfg21
+Traceback (most recent call last):
+  File "/home/lee/lga/run6.py", line 247, in <module>
+    p, r, ep = train_eval(cfg, vs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 194, in train_eval
+    p = torch.sigmoid(net(TN[b], TC[b], TT[b], TPR[b], TPN[b], TBR[b], TBN[b]))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/lga/run6.py", line 146, in forward
+    return s.out(s.tr(z)[:,0]).squeeze(-1)
+                 ^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 514, in forward
+    output = mod(
+             ^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 910, in forward
+    x = x + self._ff_block(self.norm2(x))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/modules/transformer.py", line 941, in _ff_block
+    x = self.linear2(self.dropout(self.activation(self.linear1(x))))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lee/anaconda3/envs/lga/lib/python3.11/site-packages/torch/nn/functional.py", line 1704, in relu
+    result = torch.relu(input)
+             ^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA driver error: out of memory
+
+[ 122.2m] [ 22] TabM  avg=  400.9 24:  641.0 22:  160.9 | k8 h256 L2 plrTrue lr0.002 wd0.0001
+[ 133.8m] [ 23] TabM  avg=  104.5 24:  200.1 22:    8.9 | k64 h256 L3 plrTrue lr0.002 wd0.0001
+[ 143.0m] [ 24] TabM  avg=  319.9 24:  545.2 22:   94.6 | k32 h512 L2 plrTrue lr0.002 wd0.0001
+[ 151.0m] [ 25] TabM  avg=  478.2 24:  529.7 22:  426.7 | k32 h512 L3 plrFalse lr0.002 wd0.0001
+[ 156.9m] [ 26] TabM  avg=  322.3 24:  433.9 22:  210.6 | k64 h128 L3 plrTrue lr0.002 wd0.01
+[ 157.9m] [ 27] TabM  avg=  376.4 24:  600.7 22:  152.2 | k8 h128 L2 plrTrue lr0.002 wd0.001
+[ 188.0m] [ 28] FTT   avg=  512.1 24:  693.5 22:  330.7 | d32 L2 heads4 lr0.001 wd0.001
+[ 188.5m] [ 29] TabM  avg=  399.2 24:  519.8 22:  278.6 | k8 h128 L3 plrFalse lr0.002 wd0.0001
+[ 219.8m] [ 30] FTT   avg=  519.4 24:  585.0 22:  453.8 | d32 L3 heads4 lr0.001 wd0.001
+[ 250.6m] [ 31] FTT   avg=  471.4 24:  704.3 22:  238.4 | d64 L3 heads4 lr0.001 wd0.0001
+[ 250.9m] [ 32] Hier  avg=  435.4 24:  624.7 22:  246.0 | h128 lr0.003 wd0.0001
+[ 262.0m] [ 33] TabM  avg=  366.7 24:  589.3 22:  144.1 | k64 h512 L2 plrFalse lr0.002 wd0.01
+[ 262.2m] [ 34] Hier  avg=  350.7 24:  607.1 22:   94.3 | h64 lr0.003 wd0.0001
+[ 268.7m] [ 35] TabM  avg=  332.5 24:  524.0 22:  141.1 | k64 h256 L3 plrFalse lr0.002 wd0.0001
+[ 271.7m] [ 36] TabM  avg=  402.1 24:  470.1 22:  334.2 | k32 h128 L2 plrTrue lr0.002 wd0.01
+[ 272.6m] [ 37] TabM  avg=  348.9 24:  546.0 22:  151.9 | k8 h128 L2 plrTrue lr0.002 wd0.0001
+[ 273.0m] [ 38] Hier  avg=  327.2 24:  654.5 22:    0.0 | h128 lr0.001 wd0.0001
+[ 273.4m] [ 39] TabM  avg=  429.7 24:  561.2 22:  298.1 | k8 h128 L2 plrFalse lr0.002 wd0.01
+[ 274.7m] [ 40] TabM  avg=  424.3 24:  556.8 22:  291.8 | k32 h128 L2 plrFalse lr0.002 wd0.001
+[ 279.3m] [ 41] TabM  avg=  306.1 24:  612.3 22:    0.0 | k32 h256 L2 plrTrue lr0.002 wd0.01
+[ 288.3m] [ 42] TabM  avg=  307.3 24:  614.6 22:    0.0 | k64 h256 L2 plrTrue lr0.002 wd0.0001
+[ 290.6m] [ 43] TabM  avg=  382.1 24:  614.9 22:  149.3 | k8 h512 L3 plrFalse lr0.002 wd0.01
+[ 296.1m] [ 44] TabM  avg=  398.4 24:  561.8 22:  235.0 | k32 h256 L3 plrTrue lr0.002 wd0.0001
+[ 299.4m] [ 45] TabM  avg=  391.3 24:  651.4 22:  131.3 | k8 h512 L3 plrTrue lr0.002 wd0.01
+[ 302.0m] [ 46] TabM  avg=  377.5 24:  474.8 22:  280.2 | k64 h128 L2 plrFalse lr0.002 wd0.001
+[ 313.6m] [ 47] TabM  avg=  343.7 24:  549.4 22:  138.0 | k64 h512 L2 plrFalse lr0.002 wd0.001
+[ 345.2m] [ 48] FTT   avg=  483.1 24:  597.0 22:  369.2 | d64 L2 heads4 lr0.001 wd0.0001
+[ 347.4m] [ 49] TabM  avg=  492.0 24:  645.0 22:  339.0 | k8 h512 L3 plrFalse lr0.002 wd0.001
+[ 348.2m] [ 50] TabM  avg=  116.4 24:  232.7 22:    0.0 | k8 h256 L2 plrFalse lr0.002 wd0.001
+[ 349.7m] [ 51] TabM  avg=  445.6 24:  622.5 22:  268.7 | k8 h256 L3 plrTrue lr0.002 wd0.0001
+[ 354.3m] [ 52] TabM  avg=  312.0 24:  624.0 22:    0.0 | k32 h256 L2 plrTrue lr0.002 wd0.0001
+[ 374.0m] [ 53] TabM  avg=  199.6 24:  399.2 22:    0.0 | k64 h512 L2 plrTrue lr0.002 wd0.001
+[ 379.9m] [ 54] TabM  avg=  358.5 24:  535.2 22:  181.8 | k32 h512 L2 plrFalse lr0.002 wd0.01
+[ 385.8m] [ 55] TabM  avg=  345.8 24:  476.0 22:  215.5 | k64 h128 L3 plrTrue lr0.002 wd0.0001
+[ 389.1m] [ 56] TabM  avg=  146.2 24:  188.1 22:  104.2 | k64 h128 L3 plrFalse lr0.002 wd0.001
+[ 389.4m] [ 57] Hier  avg=  560.7 24:  662.0 22:  459.4 | h256 lr0.003 wd0.0001  <== BEST
+[ 395.5m] [ 58] TabM  avg=  182.8 24:  365.6 22:    0.0 | k64 h128 L2 plrTrue lr0.002 wd0.01
+[ 398.5m] [ 59] TabM  avg=  420.5 24:  578.3 22:  262.7 | k32 h128 L2 plrTrue lr0.002 wd0.0001
+[ 398.8m] [ 60] Hier  avg=  333.7 24:  667.5 22:    0.0 | h128 lr0.001 wd0.001
+[ 399.1m] [ 61] Hier  avg=  328.5 24:  657.1 22:    0.0 | h128 lr0.001 wd0.01
+[ 418.2m] [ 62] TabM  avg=  302.5 24:  480.9 22:  124.2 | k64 h512 L3 plrFalse lr0.002 wd0.0001
+[ 421.5m] [ 63] TabM  avg=  358.9 24:  547.4 22:  170.4 | k32 h256 L3 plrFalse lr0.002 wd0.01
+[ 426.0m] [ 64] TabM  avg=  308.9 24:  561.7 22:   56.0 | k64 h256 L2 plrFalse lr0.002 wd0.01
+[ 434.7m] [ 65] TabM  avg=  355.1 24:  624.1 22:   86.0 | k64 h256 L2 plrTrue lr0.002 wd0.001
+[ 436.2m] [ 66] TabM  avg=  410.3 24:  567.0 22:  253.7 | k8 h256 L3 plrTrue lr0.002 wd0.001
+[ 462.3m] [ 67] TabM  avg=   92.5 24:  184.9 22:    0.0 | k64 h512 L3 plrTrue lr0.002 wd0.0001
+[ 493.2m] [ 68] FTT   avg=  391.7 24:  587.2 22:  196.2 | d64 L3 heads4 lr0.001 wd0.001
+
+[ 493.2m] ===== shard 0 완료 =====

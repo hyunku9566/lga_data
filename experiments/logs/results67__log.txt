@@ -1,0 +1,5 @@
+[  0.2m] 시즌별 인과 사전확률: {2019: 0.5238, 2020: 0.5495, 2021: 0.5044, 2022: 0.493, 2023: 0.4853, 2024: 0.4844, 2025: 0.4763}
+[  0.2m] 기존 고정 사전확률 p_succ=0.5352
+[  0.3m] 변경된 컬럼 22개: ['p_succ_ssn', 'p_succ_ssn_vs_car', 'p_rev_ssn', 'p_rev_ssn_vs_car', 'p_mid_ssn', 'p_mid_ssn_vs_car', 'p_ball_ssn', 'p_ball_ssn_vs_car', 'p_stk_ssn', 'p_stk_ssn_vs_car', 'b_succ_ssn', 'b_succ_ssn_vs_car', 'b_mid_ssn', 'b_mid_ssn_vs_car', 'p_succ_k25', 'p_succ_k75', 'p_succ_k400', 'p_succ_k1000', 'b_succ_k25', 'b_succ_k75', 'b_succ_k400', 'b_succ_k1000']
+[  3.2m]   현행 (고정 사전확률)                      (124) 24:  872.9  23:  781.8  [기준]
+[  6.0m]   시즌 인과 사전확률                        (124) 24:  865.7 (  -7.2) 23:  784.3 (  +2.5)   
